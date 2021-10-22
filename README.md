@@ -14,7 +14,7 @@ To test this solution:
 
 2- To run and test the solution, run the prifob.py or the Dockerfile within the repo as follows:
 
-# Without Docker:
+# Run Without Docker:
 - Generally, Python 3.8 and some packages (apt, pip3, RSA, and Cryptography) need to be installed on all machines in order to run the system.
 -	To install python 3.8: https://www.python.org/downloads/
 -	To install apt: https://manpages.debian.org/buster/apt/apt.8.en.html
@@ -23,7 +23,7 @@ Or sudo apt update
 -	To install rsa: sudo apt install python3-rsa
 -	Type python3 prifob.py in the command line.
 
-# With Docker:
+# Run With Docker:
 - Install Docker on your system (Ubuntu installation: https://docs.docker.com/engine/install/ubuntu/)
 - Navigate to the root of the project, where the PriFoB source code was cloned and find the Dockerfile file.
 - Build the Docker image:
