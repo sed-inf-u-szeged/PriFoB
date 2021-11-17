@@ -21,6 +21,8 @@ DIDs_under_processing = []
 schemes_under_processing = []
 revoked_credentials_under_processing = []
 mining_requests = []
+print("Data should be saved on miners': 1: RAM, 2: Secondary Memory\n>>")
+data_on_secondary_memory = shared_functions.input_function(['1', '2'])
 
 
 def handle_requests_in_buffer():
@@ -114,12 +116,12 @@ def assign_neighbor_for_miner(miner):
         return neighbor, miner
 
 
-def inform_miner_of_active_status(miner_record):
+def inform_miner_of_active_status(miner_record, data_placement):
     neighbor_record, miner_record = assign_neighbor_for_miner(miner_record)
-    response = msg_constructor.construct_response_to_mining_request(True, neighbor_record,
+    response = msg_constructor.construct_response_to_mining_request(True, data_placement, neighbor_record,
                                                                     count_active_miners(),
                                                                     max_num_neighbors_per_miner)
-    response2 = msg_constructor.construct_response_to_mining_request(True, miner_record,
+    response2 = msg_constructor.construct_response_to_mining_request(True, data_placement, miner_record,
                                                                      count_active_miners(),
                                                                      max_num_neighbors_per_miner)
     client.send(response, miner_record[1])
@@ -142,17 +144,17 @@ def activate_new_miner(mining_request):
         miner_record = [mining_request[1], mining_request[0], terminology.active, time.time(), mining_request[2]]
         miners.append(miner_record)
         if count_active_miners() > 2:
-            inform_miner_of_active_status(miner_record)
+            inform_miner_of_active_status(miner_record, data_on_secondary_memory)
         else:
             if count_active_miners() == 2:
                 for miner in miners:
-                    inform_miner_of_active_status(miner)
+                    inform_miner_of_active_status(miner, data_on_secondary_memory)
             else:
                 print('Number of miners is still not sufficient.'
                       'Miners will be activated when they reach the minimum number.. press any key\n')
                 out = input()
     else:
-        response = msg_constructor.construct_response_to_mining_request(False)
+        response = msg_constructor.construct_response_to_mining_request(False, data_on_secondary_memory)
         client.send(response, mining_request[0])
     mining_requests.remove(mining_request)
 
@@ -186,7 +188,7 @@ def handle_mining_request_2(request):
                 print('\ntry again>>\n')
     else:
         miner_record = [request['location'], miner_address, terminology.active, time.time()]
-        inform_miner_of_active_status(miner_record)
+        inform_miner_of_active_status(miner_record, data_on_secondary_memory)
         print("Miner is already activated. No action is required.")
 
 

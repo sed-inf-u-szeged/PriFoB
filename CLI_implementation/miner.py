@@ -10,6 +10,7 @@ import new_encryption_module
 import blockchain
 import terminology
 import consensus
+import pickle
 
 
 class Miner:
@@ -29,6 +30,7 @@ class Miner:
 
     def automated_processing(self):
         self.request_to_be_miner()
+        self.my_blockchain.save_modified_blockchain(self.my_blockchain.chain)
         while True:
             try:
                 # self.my_blockchain.resolve_signed_DIDs(self.miners, self.BC_address, self.neighbors, self.location)
@@ -44,6 +46,7 @@ class Miner:
             self.neighbors = [request['neighbor'][1]]
             self.num_of_miners = request['Num_of_miners']
             self.max_num_neighbors = request['num_of_neighbors']
+            self.my_blockchain.data_placement = request['data_placement']
             print('This device has been assigned a new neighbor and is now part of the BC network')
         else:
             print('you were not accepted as a miner')
@@ -149,7 +152,15 @@ class Miner:
             self.my_blockchain.chain = request_under_processing['Public_blockchain']
             print('Local DL has been synchronized.')
 
+    def update_my_blockchain(self):
+        if self.my_blockchain.data_placement == '2':
+            self.my_blockchain.chain = []
+            open_file = open('local_files/blockchain/blockchain.pkl', "rb")
+            self.my_blockchain.chain = pickle.load(open_file)
+            open_file.close()
+
     def local_bc_info(self):
+        self.update_my_blockchain()
         number_of_DIDs, number_of_Schemes, total_revoked_credentials = self.my_blockchain.num_of_confirmed_blocks()
         print('Number of DIDs currently on the chain = ' + str(number_of_DIDs - 1))
         print('Number of schemes currently on the 2D chain = ' + str(number_of_Schemes))

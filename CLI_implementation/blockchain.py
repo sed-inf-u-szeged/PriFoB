@@ -8,6 +8,7 @@ import output
 import copy
 import shared_functions
 import terminology
+import pickle
 
 
 def fully_signed(tx, num_miners):
@@ -54,6 +55,7 @@ class Blockchain:
         self.unsigned_DIDs = []
         self.pending_blocks = {}
         self.automatic_signing = signing_model
+        self.data_placement = '0'
 
     def num_of_confirmed_blocks(self):
         number_of_DIDs = len(self.chain)
@@ -258,6 +260,18 @@ class Blockchain:
             self.chain[DID_index]['schemes_chain'].append(new_block)
         if block_type == terminology.revoke_block:
             self.chain[DID_index]['schemes_chain'][schema_index]['Hashes_of_revoked_credentials'].append(new_block)
+        self.save_modified_blockchain()
+
+    def save_modified_blockchain(self, version=None):
+        if version:
+            open_file = open('local_files/blockchain/blockchain.pkl', "wb")
+            pickle.dump(version, open_file)
+            open_file.close()
+        else:
+            if self.data_placement == '2':
+                open_file = open('local_files/blockchain/blockchain.pkl', "wb")
+                pickle.dump(self.chain, open_file)
+                open_file.close()
 
     def process_unsigned_dids(self, miner_location, miners, BC_address, neighbors):
         for index in range(len(self.unsigned_DIDs)):

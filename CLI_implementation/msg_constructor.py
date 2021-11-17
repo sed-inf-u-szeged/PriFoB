@@ -177,13 +177,14 @@ def request_to_be_miner(location, address, public_key):
     return request
 
 
-def construct_response_to_mining_request(is_added, neighbor=None, num_miners=None, num_of_neighbors=None):
+def construct_response_to_mining_request(is_added, data_placement, neighbor=None, num_miners=None, num_of_neighbors=None):
     response = {terminology.the_type: 'response to mining request',
                 'added': is_added}
     if is_added:
         response['neighbor'] = neighbor
         response['Num_of_miners'] = num_miners
         response['num_of_neighbors'] = num_of_neighbors
+        response['data_placement'] = data_placement
     return response
 
 ###########################################################################################
