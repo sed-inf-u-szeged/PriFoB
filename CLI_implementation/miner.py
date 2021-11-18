@@ -195,6 +195,8 @@ class Miner:
 
     def put_blockchain_on_secondary_memory(self):
         if self.my_blockchain.data_placement == '2':
+            file = open('local_files/blockchain/blockchain.pkl', 'w')
+            file.close()
             with open('local_files/blockchain/blockchain.pkl', 'wb') as file:
                 pickle.dump(self.my_blockchain.chain, file, protocol=pickle.HIGHEST_PROTOCOL)
 
