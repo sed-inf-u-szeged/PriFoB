@@ -58,23 +58,24 @@ class Miner:
             if request_under_processing[terminology.the_type] in terminology.transactions_labels:
                 self.my_blockchain.handle_new_block_request(request_under_processing, self.miners, self.BC_address, self.neighbors, requester_address, self.location, self.authorized_miner)
                 self.put_blockchain_on_secondary_memory()
-            if request_under_processing[terminology.the_type] == terminology.block:
+            elif request_under_processing[terminology.the_type] == terminology.block:
+                print("Im here")
                 self.handle_new_block(request_under_processing)
-            if request_under_processing[terminology.the_type] == 'signature_validation':
+            elif request_under_processing[terminology.the_type] == 'signature_validation':
                 self.handle_signature(request_under_processing)
-            if request_under_processing[terminology.the_type] == 'Blockchain_info':
+            elif request_under_processing[terminology.the_type] == 'Blockchain_info':
                 self.respond_to_BC_info_request(requester_address)
-            if request_under_processing[terminology.the_type] == 'response to Blockchain_info request':
+            elif request_under_processing[terminology.the_type] == 'response to Blockchain_info request':
                 self.react_to_provided_BC_info(request_under_processing, requester_address)
-            if request_under_processing[terminology.the_type] == 'download_BC':
+            elif request_under_processing[terminology.the_type] == 'download_BC':
                 self.provide_full_BC(request_under_processing, requester_address)
-            if request_under_processing[terminology.the_type] == 'full_BC':
+            elif request_under_processing[terminology.the_type] == 'full_BC':
                 self.update_my_BC(request_under_processing, requester_address)
-            if request_under_processing[terminology.the_type] == 'institutions':
+            elif request_under_processing[terminology.the_type] == 'institutions':
                 self.handle_institutions_info_request(request_under_processing['agent_address'])
-            if request_under_processing[terminology.the_type] == 'ping' and self.requester_authorized(requester_address):
+            elif request_under_processing[terminology.the_type] == 'ping' and self.requester_authorized(requester_address):
                 self.respond_to_ping(requester_address, request_under_processing)
-            if request_under_processing[terminology.the_type] == 'response to mining request' and requester_address == self.BC_address:
+            elif request_under_processing[terminology.the_type] == 'response to mining request' and requester_address == self.BC_address:
                 self.receive_response_to_mining_request(request_under_processing)
         except Exception as e:
             print(e)
@@ -86,7 +87,6 @@ class Miner:
             if consensus.verify_proof_of_authority(self.miners, received_block['Header']['Minter_id'],
                                                    received_block['Body'],
                                                    received_block['Header'][terminology.signature]):
-                print('im here')
                 DID_identifier, schema_identifier, revoke_identifier = blockchain.get_identifiers(
                     received_block['Body'][terminology.transaction], received_block['Header'][terminology.the_type])
                 if received_block['Header'][terminology.the_type] == terminology.DID_block:
