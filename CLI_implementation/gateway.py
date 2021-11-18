@@ -96,14 +96,17 @@ def miner_is_active(miner_record):
 
 
 def select_random_miner():
-    not_found = True
-    random_miner = random.choice(miners)
-    while not_found:
+    try:
+        not_found = True
         random_miner = random.choice(miners)
-        if miner_is_active(random_miner):
-            not_found = False
-    miner_address = random_miner[1]
-    return miner_address
+        while not_found:
+            random_miner = random.choice(miners)
+            if miner_is_active(random_miner):
+                not_found = False
+        miner_address = random_miner[1]
+        return miner_address
+    except Exception as e:
+        print(e)
 
 
 # The following function needs to be modified using the DONS approach
@@ -228,13 +231,13 @@ def handle_confirmation_messages(confirmation_message, miner_ip):
                             customer = DID_under_processing[1]
                             DIDs_under_processing.remove(DID_under_processing)
                             break
-                if confirmation_message['block_type'] == terminology.schema_block:
+                elif confirmation_message['block_type'] == terminology.schema_block:
                     for schema_under_processing in schemes_under_processing:
                         if schema_under_processing[0] == confirmation_message['block_identifier']:
                             customer = schema_under_processing[1]
                             schemes_under_processing.remove(schema_under_processing)
                             break
-                if confirmation_message['block_type'] == terminology.revoke_block:
+                elif confirmation_message['block_type'] == terminology.revoke_block:
                     for revoked_credential_under_processing in revoked_credentials_under_processing:
                         if revoked_credential_under_processing[0] == confirmation_message['block_identifier']:
                             customer = revoked_credential_under_processing[1]
