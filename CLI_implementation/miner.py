@@ -86,12 +86,12 @@ class Miner:
             if consensus.verify_proof_of_authority(self.miners, received_block['Header']['Minter_id'],
                                                    received_block['Body'],
                                                    received_block['Header'][terminology.signature]):
+                print('im here')
                 DID_identifier, schema_identifier, revoke_identifier = blockchain.get_identifiers(
                     received_block['Body'][terminology.transaction], received_block['Header'][terminology.the_type])
                 if received_block['Header'][terminology.the_type] == terminology.DID_block:
                     existing_block, DID_index = self.my_blockchain.DID_block_exists(DID_identifier)
                     if not existing_block or DID_index != received_block['Header'][terminology.index]:
-                        print('im here')
                         if self.previous_signature_is_correct(received_block['Header'][terminology.the_type],
                                                               received_block['Body'][terminology.previous_signature],
                                                               DID_index, None):
