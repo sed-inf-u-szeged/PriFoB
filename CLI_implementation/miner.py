@@ -91,7 +91,7 @@ class Miner:
                 if received_block['Header'][terminology.the_type] == terminology.DID_block:
                     existing_block, DID_index = self.my_blockchain.DID_block_exists(DID_identifier)
                     if not existing_block or DID_index != received_block['Header'][terminology.index]:
-                        print('Im here')
+                        print('im here')
                         if self.previous_signature_is_correct(received_block['Header'][terminology.the_type],
                                                               received_block['Body'][terminology.previous_signature],
                                                               DID_index, None):
