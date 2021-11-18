@@ -36,7 +36,7 @@ class Miner:
             try:
                 # self.my_blockchain.resolve_signed_DIDs(self.miners, self.BC_address, self.neighbors, self.location)
                 request_under_processing, requester_address = shared_functions.get_new_msg()
-                # print(request_under_processing)
+                print(request_under_processing)
                 self.respond_to_second_level_request(request_under_processing, requester_address)
             except Exception as e:
                 print(e)
@@ -59,7 +59,6 @@ class Miner:
                 self.my_blockchain.handle_new_block_request(request_under_processing, self.miners, self.BC_address, self.neighbors, requester_address, self.location, self.authorized_miner)
                 self.put_blockchain_on_secondary_memory()
             elif request_under_processing[terminology.the_type] == terminology.block:
-                print("Im here")
                 self.handle_new_block(request_under_processing)
             elif request_under_processing[terminology.the_type] == 'signature_validation':
                 self.handle_signature(request_under_processing)
