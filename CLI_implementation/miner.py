@@ -36,7 +36,7 @@ class Miner:
             try:
                 # self.my_blockchain.resolve_signed_DIDs(self.miners, self.BC_address, self.neighbors, self.location)
                 request_under_processing, requester_address = shared_functions.get_new_msg()
-                print(request_under_processing)
+                # print(request_under_processing)
                 self.respond_to_second_level_request(request_under_processing, requester_address)
             except Exception as e:
                 print(e)
