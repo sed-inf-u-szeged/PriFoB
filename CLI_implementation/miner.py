@@ -188,6 +188,7 @@ class Miner:
             self.my_blockchain.chain.clear()
             self.my_blockchain.chain = request_under_processing['Public_blockchain']
             print('Local DL has been synchronized.')
+            self.update_my_blockchain()
 
     def update_my_blockchain(self):
         if self.my_blockchain.data_placement == '2':
