@@ -304,18 +304,13 @@ class Blockchain:
             self.chain[DID_index]['schemes_chain'].append(new_block)
         if block_type == terminology.revoke_block:
             self.chain[DID_index]['schemes_chain'][schema_index]['Hashes_of_revoked_credentials'].append(new_block)
-        self.save_modified_blockchain()
 
     def save_modified_blockchain(self, version=None):
         if version:
             open_file = open('local_files/blockchain/blockchain.pkl', "wb")
             pickle.dump(version, open_file)
             open_file.close()
-        else:
-            if self.data_placement == '2':
-                open_file = open('local_files/blockchain/blockchain.pkl', "wb")
-                pickle.dump(self.chain, open_file)
-                open_file.close()
+
 
     def process_unsigned_dids(self, miner_location, miners, BC_address, neighbors, authorized_miner):
         for index in range(len(self.unsigned_DIDs)):

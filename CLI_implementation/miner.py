@@ -57,6 +57,7 @@ class Miner:
         try:
             if request_under_processing[terminology.the_type] in terminology.transactions_labels:
                 self.my_blockchain.handle_new_block_request(request_under_processing, self.miners, self.BC_address, self.neighbors, requester_address, self.location, self.authorized_miner)
+                self.put_blockchain_on_secondary_memory()
             if request_under_processing[terminology.the_type] == terminology.block:
                 self.handle_new_block(request_under_processing)
             if request_under_processing[terminology.the_type] == 'signature_validation':
@@ -92,15 +93,15 @@ class Miner:
                     if existing_block and DID_index == received_block['Header'][terminology.index]:
                         pass
                     else:
-                        schema_index = None
                         if self.previous_signature_is_correct(received_block['Header'][terminology.the_type],
                                                               received_block['Body'][terminology.previous_signature],
-                                                              DID_index, schema_index):
+                                                              DID_index, None):
                             self.my_blockchain.add_block_to_local_chain(received_block,
                                                                         received_block['Header'][terminology.the_type],
-                                                                        DID_index, schema_index)
+                                                                        DID_index, None)
                             print('new valid block is received..!')
                             blockchain.send_request_to_active_neighbors(request_under_processing, self.neighbors)
+                            self.put_blockchain_on_secondary_memory()
                 elif received_block['Header'][terminology.the_type] == terminology.schema_block:
                     existing_block, schema_index = self.my_blockchain.schema_block_exists(received_block['Body'][terminology.transaction][terminology.DID_index], schema_identifier)
                     if existing_block and schema_index == received_block['Header'][terminology.index]:
@@ -114,6 +115,7 @@ class Miner:
                                                                         received_block['Body'][terminology.transaction][terminology.DID_index], schema_index)
                             print('new valid block is received..!')
                             blockchain.send_request_to_active_neighbors(request_under_processing, self.neighbors)
+                            self.put_blockchain_on_secondary_memory()
                 elif received_block['Header'][terminology.the_type] == terminology.schema_block:
                     existing_block, revoke_index = self.my_blockchain.revoke_block_exists(received_block['Body'][terminology.transaction][terminology.DID_index], received_block['Body'][terminology.transaction][terminology.schema_index], revoke_identifier)
                     if existing_block and revoke_index == received_block['Header'][terminology.index]:
@@ -131,6 +133,7 @@ class Miner:
                                                                             terminology.DID_index])
                             print('new valid block is received..!')
                             blockchain.send_request_to_active_neighbors(request_under_processing, self.neighbors)
+                            self.put_blockchain_on_secondary_memory()
         except Exception as e:
             print(e)
 
@@ -188,17 +191,21 @@ class Miner:
             self.my_blockchain.chain.clear()
             self.my_blockchain.chain = request_under_processing['Public_blockchain']
             print('Local DL has been synchronized.')
-            self.update_my_blockchain()
+            self.put_blockchain_on_secondary_memory()
 
-    def update_my_blockchain(self):
+    def put_blockchain_on_secondary_memory(self):
         if self.my_blockchain.data_placement == '2':
-            self.my_blockchain.chain = []
-            open_file = open('local_files/blockchain/blockchain.pkl', "rb")
-            self.my_blockchain.chain = pickle.load(open_file)
-            open_file.close()
+            with open('local_files/blockchain/blockchain.pkl', 'wb') as file:
+                pickle.dump(self.my_blockchain.chain, file, protocol=pickle.HIGHEST_PROTOCOL)
+
+    def fetch_blockchain_from_secondary_memory(self):
+        if self.my_blockchain.data_placement == '2':
+            self.my_blockchain.chain.clear()
+            with open('local_files/blockchain/blockchain.pkl', 'rb') as file:
+                self.my_blockchain.chain = pickle.load(file)
 
     def local_bc_info(self):
-        self.update_my_blockchain()
+        self.fetch_blockchain_from_secondary_memory()
         number_of_DIDs, number_of_Schemes, total_revoked_credentials = self.my_blockchain.num_of_confirmed_blocks()
         print('Number of DIDs currently on the chain = ' + str(number_of_DIDs - 1))
         print('Number of schemes currently on the 2D chain = ' + str(number_of_Schemes))
