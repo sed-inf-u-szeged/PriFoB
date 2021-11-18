@@ -20,23 +20,24 @@ def construct_new_block_request(request_type, data, deserialized_signature=0):
     return request
 
 
-def construct_new_block(block_type, block_body, ip_address, issuer_signature=0, previous_signature=0, signature=0):
+def construct_new_block(block_type, block_body, ip_address, index, issuer_signature=0, previous_signature=0, signature=0):
     try:
         if block_type == terminology.DID_block:
-            return construct_DID_block(block_type, block_body, ip_address, previous_signature, signature)
+            return construct_DID_block(block_type, block_body, ip_address, previous_signature, signature, index)
         if block_type == terminology.schema_block:
-            return construct_schema_block(block_type, block_body, ip_address, previous_signature, signature, issuer_signature)
+            return construct_schema_block(block_type, block_body, ip_address, previous_signature, signature, issuer_signature, index)
         if block_type == terminology.revoke_block:
-            return construct_revoke_block(block_type, block_body, ip_address, previous_signature, issuer_signature, signature)
+            return construct_revoke_block(block_type, block_body, ip_address, previous_signature, issuer_signature, signature, index)
     except Exception as e:
         print(e)
 
 
-def construct_DID_block(block_type, block_body, minter_id, previous_signature, signature):
+def construct_DID_block(block_type, block_body, minter_id, previous_signature, signature, index):
     schema_genesis_block = construct_Genesis_block(terminology.schema_block, minter_id)
     block = {'Header': {terminology.the_type: block_type,
                         'Minter_id': minter_id,
-                        terminology.signature: signature},
+                        terminology.signature: signature,
+                        terminology.index: index},
              'Body': {terminology.transaction: block_body,
                       terminology.previous_signature: previous_signature},
              'schemes_chain': [schema_genesis_block]
@@ -52,15 +53,16 @@ def construct_internal_request(request_type, agent_address, request_body):
 
 
 def construct_Genesis_block(block_type, gateway_address, previous_signature=0):
-    block = construct_new_block(block_type, {terminology.identifier: 'Genesis Block'}, gateway_address, previous_signature, new_encryption_module.hashing_function('Genesis Block'))
+    block = construct_new_block(block_type, {terminology.identifier: 'Genesis Block'}, gateway_address, 0, previous_signature, new_encryption_module.hashing_function('Genesis Block'))
     return block
 
 
-def construct_schema_block(block_type, block_body, minter_id, previous_signature_on_BC, signature_of_miner, signature_of_issuer):
+def construct_schema_block(block_type, block_body, minter_id, previous_signature_on_BC, signature_of_miner, signature_of_issuer, index):
     revoke_genesis_block = construct_Genesis_block(terminology.revoke_block, minter_id)
     block = {'Header': {terminology.the_type: block_type,
                         'Minter_id': minter_id,
-                        terminology.signature: signature_of_miner},
+                        terminology.signature: signature_of_miner,
+                        terminology.index: index},
              'Body': {terminology.transaction: block_body,
                       terminology.previous_signature: previous_signature_on_BC,
                       terminology.issuer_signature: signature_of_issuer},
@@ -69,11 +71,12 @@ def construct_schema_block(block_type, block_body, minter_id, previous_signature
     return block
 
 
-def construct_block_confirmation_message(is_added, block_type, miner_ip, block_identifier, miner_to_gateway):
+def construct_block_confirmation_message(is_added, block_type, miner_ip, block_identifier, miner_to_gateway, index):
     response = {terminology.the_type: 'block_confirmation',
                 'block_type': block_type,
                 'block_identifier': block_identifier,
-                'added': is_added}
+                'added': is_added,
+                terminology.index: index}
     if miner_to_gateway:
         response['miner'] = miner_ip
     return response
@@ -108,9 +111,11 @@ def define_schema_attributes():
     return new_schema_attributes
 
 
-def construct_new_digital_credential(inst_name, label, credential_attributes):
+def construct_new_digital_credential(inst_name, label, credential_attributes, DID_index, schema_index):
     new_credential = {terminology.did_identifier: inst_name,
-                      terminology.schema_identifier: label}
+                      terminology.schema_identifier: label,
+                      terminology.DID_index: DID_index,
+                      terminology.schema_index: schema_index}
     new_credential_label = 'cre_' + label + '_'
     for attribute in credential_attributes:
         new_field = input("please input: " + attribute[0] + '\n>>')
@@ -120,10 +125,12 @@ def construct_new_digital_credential(inst_name, label, credential_attributes):
     return new_credential, new_credential_label
 
 
-def construct_validation_request(did_identifier, schema_identifier, signature, hashed_credential, requester_address):
+def construct_validation_request(did_identifier, schema_identifier, did_index, schema_index, signature, hashed_credential, requester_address):
     request = {terminology.the_type: 'signature_validation',
                terminology.did_identifier: did_identifier,
+               terminology.DID_index: did_index,
                terminology.schema_identifier: schema_identifier,
+               terminology.schema_index: schema_index,
                'requester_address': requester_address,
                'hash_of_credential': hashed_credential,
                terminology.signature: signature}
@@ -143,18 +150,21 @@ def signature_validation_response(result, did_identifier, schema_identifier, acc
     return response
 
 
-def revoke_block_data(inst_name, address, schema_label, hash_of_signed_credential):
+def revoke_block_data(inst_name, address, schema_label, hash_of_signed_credential, DID_index, schema_index):
     data = {terminology.did_identifier: inst_name,
+            terminology.DID_index: DID_index,
+            terminology.schema_index: schema_index,
             'institution_address': address,
             terminology.schema_identifier: schema_label,
             terminology.identifier: hash_of_signed_credential}
     return data
 
 
-def construct_revoke_block(block_type, block_body, minter_id, previous_signature, issuer_signature, signature):
+def construct_revoke_block(block_type, block_body, minter_id, previous_signature, issuer_signature, signature, index):
     block = {'Header': {terminology.the_type: block_type,
                         'Minter_id': minter_id,
-                        terminology.signature: signature},
+                        terminology.signature: signature,
+                        terminology.index: index},
              'Body': {terminology.transaction: block_body,
                       terminology.previous_signature: previous_signature,
                       terminology.issuer_signature: issuer_signature}

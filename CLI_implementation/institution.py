@@ -24,6 +24,7 @@ class Institution:
         self.pending_schema_requests = []
         self.pending_revoke_requests = []
         self.notifications = {}
+        self.DID_index = None
 
     def publish_my_DID(self, BC_address):
         try:
@@ -65,6 +66,7 @@ class Institution:
                 deserialized_public_key = new_encryption_module.deserialize_key(schema_public_key)
                 print('keys of the new schema are generated')
                 schema_transaction['schema_public_key'] = deserialized_public_key
+                schema_transaction[terminology.DID_index] = self.DID_index
                 print('schema public key is added to the request')
                 self.publish_new_schema(schema_transaction, BC_address)
             else:
@@ -91,7 +93,8 @@ class Institution:
                 with open('local_files/schemes/' + label + '.txt', 'r') as file:
                     schema = json.load(file)
                 credential_attributes = schema['schema_attributes']
-                new_credential, credential_label = msg_constructor.construct_new_digital_credential(self.name, label, credential_attributes)
+                schema_index = schema[terminology.index]
+                new_credential, credential_label = msg_constructor.construct_new_digital_credential(self.name, label, credential_attributes, self.DID_index, schema_index)
                 signature = shared_functions.retrieve_signature_from_saved_key(new_credential, label)
                 signed_credential = {terminology.credential: new_credential,
                                      terminology.signature: signature}
@@ -125,7 +128,6 @@ class Institution:
         response = {terminology.the_type: 'response_to_credential_request'}
         if credential_is_available:
             response['status'] = True
-
             encrypted_credential, final_encoded_encrypted_symmetric_key = shared_functions.react_to_credential_request(
                 requested_credential, request['requester_pub_key'])
             response['encrypted_credential'] = encrypted_credential
@@ -149,13 +151,15 @@ class Institution:
                         data = None
                         if body['block_type'] == terminology.DID_block:
                             self.DID_published = body['added']
-                        if body['block_type'] == terminology.schema_block:
+                            self.DID_index = body[terminology.index]
+                        elif body['block_type'] == terminology.schema_block:
                             for pending_schema_publication_request in self.pending_schema_requests:
                                 if pending_schema_publication_request[1] == body['block_identifier']:
+                                    pending_schema_publication_request[0][terminology.index] = body[terminology.index]
                                     shared_functions.save_file_locally(pending_schema_publication_request[0], str(
                                         pending_schema_publication_request[0][terminology.identifier]), 'schemes')
                                     data = pending_schema_publication_request[0]
-                        if body['block_type'] == terminology.revoke_block:
+                        elif body['block_type'] == terminology.revoke_block:
                             data = self.delete_revoked_credential(body['block_identifier'])
                         notification = msg_constructor.construct_notification(body['block_type'], body['added'], data)
                         self.notifications[str(len(self.notifications) + 1)] = notification
@@ -195,9 +199,11 @@ class Institution:
         decision = shared_functions.input_function(['Y', 'y', 'N', 'n'])
         if decision == 'Y' or decision == 'y':
             schema_identifier = selected_credential[terminology.credential][terminology.schema_identifier]
+            DID_index = self.DID_index
+            schema_index = selected_credential[terminology.credential][terminology.schema_index]
             hash_of_signed_credential = new_encryption_module.hashing_function(selected_credential[terminology.credential])
             signature = shared_functions.retrieve_signature_from_saved_key(selected_credential[terminology.credential], schema_identifier)
-            revoke_data = msg_constructor.revoke_block_data(self.name, self.address, schema_identifier, hash_of_signed_credential)
+            revoke_data = msg_constructor.revoke_block_data(self.name, self.address, schema_identifier, hash_of_signed_credential, DID_index, schema_index)
             revoke_request = msg_constructor.construct_new_block_request(terminology.revoke_request, revoke_data, signature)
             print("revoke request is ready to be sent. [ATTENTION: THIS CANNOT BE UNDONE!] to confirm, type the label of the credential one more time:\n")
             confirmation = input()

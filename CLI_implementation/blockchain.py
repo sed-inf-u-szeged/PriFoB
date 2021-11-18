@@ -26,15 +26,13 @@ def get_identifiers(transaction_data, transaction_type):
     revoke_identifier = None
     if transaction_type == terminology.DID_publication_request or transaction_type == terminology.DID_block:
         DID_identifier = transaction_data[terminology.identifier]
-    else:
-        if transaction_type == terminology.schema_publication_request or transaction_type == terminology.schema_block:
-            DID_identifier = transaction_data['institution_name']
-            schema_identifier = transaction_data[terminology.identifier]
-        else:
-            if transaction_type == terminology.revoke_request or transaction_type == terminology.revoke_block:
-                DID_identifier = transaction_data[terminology.did_identifier]
-                schema_identifier = transaction_data[terminology.schema_identifier]
-                revoke_identifier = transaction_data[terminology.identifier]
+    elif transaction_type == terminology.schema_publication_request or transaction_type == terminology.schema_block:
+        DID_identifier = transaction_data['institution_name']
+        schema_identifier = transaction_data[terminology.identifier]
+    elif transaction_type == terminology.revoke_request or transaction_type == terminology.revoke_block:
+        DID_identifier = transaction_data[terminology.did_identifier]
+        schema_identifier = transaction_data[terminology.schema_identifier]
+        revoke_identifier = transaction_data[terminology.identifier]
     return DID_identifier, schema_identifier, revoke_identifier
 
 
@@ -67,12 +65,27 @@ class Blockchain:
                 total_revoked_credentials += len(schema['Hashes_of_revoked_credentials']) - 1
         return number_of_DIDs, number_of_Schemes, total_revoked_credentials
 
-    def handle_new_block_request(self, received_block_request, active_miners, gateway_address, neighbors, request_received_from, miner_location):
+    def handle_new_block_request(self, received_block_request, active_miners, gateway_address, neighbors, request_received_from, miner_location, authorized_miner):
         try:
+            revoke_index = None
+            schema_index = None
             transaction_data = received_block_request[terminology.transaction]
             transaction_type = received_block_request[terminology.the_type]
+            DID_identifier, schema_identifier, revoke_identifier = get_identifiers(transaction_data, transaction_type)
+            if transaction_type == terminology.schema_publication_request:
+                block_type = terminology.schema_block
+                DID_index = transaction_data[terminology.DID_index]
+                existing_block, schema_index = self.schema_block_exists(DID_index, schema_identifier)
+            elif transaction_type == terminology.revoke_request:
+                block_type = terminology.revoke_block
+                DID_index = transaction_data[terminology.DID_index]
+                schema_index = transaction_data[terminology.schema_index]
+                existing_block, revoke_index = self.revoke_block_exists(DID_index, schema_index, revoke_identifier)
+            else:
+                block_type = terminology.DID_block
+                existing_block, DID_index = self.DID_block_exists(DID_identifier)
+                # existing_block, DID_index, schema_index, revoke_index = self.check_if_block_exists(received_block_request)
             already_signed = False
-            existing_block, DID_index, schema_index, revoke_index = self.check_if_block_exists(received_block_request)
             transaction_is_ready_to_mint = False
             issuer_signature = None
             if existing_block is None:
@@ -89,11 +102,10 @@ class Blockchain:
                             if not self.automatic_signing:
                                 self.unsigned_DIDs.append(received_block_request)
                             else:
-                                self.add_decision(received_block_request, miner_location, active_miners, gateway_address, neighbors)
+                                self.add_decision(received_block_request, miner_location, active_miners, gateway_address, neighbors, authorized_miner)
                         else:
                             if signed_by_all:
                                 if all_signatures_are_correct:
-                                    block_type = terminology.DID_block
                                     transaction_is_ready_to_mint = True
                             else:
                                 random_neighbor = random.choice(neighbors)
@@ -101,25 +113,24 @@ class Blockchain:
                     else:
                         if signed_by_all:
                             if all_signatures_are_correct:
-                                block_type = terminology.DID_block
                                 transaction_is_ready_to_mint = True
                         else:
                             random_neighbor = random.choice(neighbors)
                             client.send(received_block_request, random_neighbor)
-
                 else:
                     issuer_signature = received_block_request[terminology.signature]
                     if transaction_type == terminology.schema_publication_request:
-                        block_type = terminology.schema_block
                         transaction_is_ready_to_mint = self.verify_this_schema_transaction(DID_index, transaction_data, issuer_signature)
                     else:
-                        block_type = terminology.revoke_block
                         transaction_is_ready_to_mint = self.verify_this_revoke_transaction(DID_index, schema_index, transaction_data, received_block_request)
                 if transaction_is_ready_to_mint:
-                    self.mint_and_add_block(transaction_data, gateway_address, block_type, neighbors, DID_index, schema_index, revoke_index, issuer_signature)
+                    if authorized_miner == self.ip_address:
+                        self.mint_and_add_block(transaction_data, gateway_address, block_type, neighbors, DID_index, schema_index, revoke_index, issuer_signature)
+                    else:
+                        client.send(received_block_request, authorized_miner)
             else:
                 if request_received_from == gateway_address:
-                    self.send_block_confirmation_msg(existing_block['Header'][terminology.the_type], existing_block['Body'][terminology.transaction][terminology.identifier], gateway_address)
+                    self.send_block_confirmation_msg(existing_block['Header'][terminology.the_type], existing_block['Body'][terminology.transaction][terminology.identifier], gateway_address, existing_block['Header'][terminology.index])
         except Exception as e:
             print(e)
 
@@ -155,8 +166,8 @@ class Blockchain:
         prepared_key = new_encryption_module.prepare_key_for_use(terminology.public, None, schema_key)
         return new_encryption_module.verify_signature(transaction_data[terminology.identifier], received_block_request[terminology.signature], prepared_key)
 
-    def send_block_confirmation_msg(self, block_type, block_identifier, gateway_address):
-        confirmation_msg = msg_constructor.construct_block_confirmation_message(True, block_type, self.ip_address, block_identifier, True)
+    def send_block_confirmation_msg(self, block_type, block_identifier, gateway_address, index):
+        confirmation_msg = msg_constructor.construct_block_confirmation_message(True, block_type, self.ip_address, block_identifier, True, index)
         client.send(confirmation_msg, gateway_address)
 
     def check_signatures(self, transaction_data, active_miners):
@@ -220,6 +231,36 @@ class Blockchain:
                 break
         return block_to_return, DID_index, schema_index, revoke_index
 
+    def DID_block_exists(self, DID_identifier):
+        block_to_return = None
+        DID_index = None
+        for i in range(len(self.chain)):
+            if self.chain[i]['Body'][terminology.transaction][terminology.identifier] == DID_identifier:
+                DID_index = i
+                block_to_return = self.chain[i]
+                break
+        return block_to_return, DID_index
+
+    def schema_block_exists(self, DID_index, schema_identifier):
+        block_to_return = None
+        schema_index = None
+        for s in range(len(self.chain[DID_index]['schemes_chain'])):
+            if self.chain[DID_index]['schemes_chain'][s]['Body'][terminology.transaction][terminology.identifier] == schema_identifier:
+                schema_index = s
+                block_to_return = self.chain[DID_index]['schemes_chain'][s]
+                break
+        return block_to_return, schema_index
+
+    def revoke_block_exists(self, DID_index, schema_index, revoke_identifier):
+        block_to_return = None
+        revoke_index = None
+        for v in range(len(self.chain[DID_index]['schemes_chain'][schema_index]['Hashes_of_revoked_credentials'])):
+            if self.chain[DID_index]['schemes_chain'][schema_index]['Hashes_of_revoked_credentials'][v]['Body'][terminology.transaction][terminology.identifier] == revoke_identifier:
+                revoke_index = v
+                block_to_return = self.chain[DID_index]['schemes_chain'][schema_index]['Hashes_of_revoked_credentials'][v]
+                break
+        return block_to_return, revoke_index
+
     def credential_is_revoked(self, did_index, schema_index, revoke_identifier):
         block_to_return = None
         revoke_index = None
@@ -235,22 +276,25 @@ class Blockchain:
         if block_type == terminology.DID_block:
             previous_signature = self.chain[-1]['Header'][terminology.signature]
             identifier = transaction[terminology.identifier]
+            index = self.chain[-1]['Header'][terminology.index] + 1
         elif block_type == terminology.schema_block:
             previous_signature = self.chain[DID_index]['schemes_chain'][-1]['Header'][terminology.signature]
             identifier = new_encryption_module.hashing_function(transaction)
+            index = self.chain[DID_index]['schemes_chain'][-1]['Header'][terminology.index] + 1
         else:
             previous_signature = self.chain[DID_index]['schemes_chain'][schema_index]['Hashes_of_revoked_credentials'][-1]['Header'][
                 terminology.signature]
             identifier = transaction[terminology.identifier]
-        new_block = msg_constructor.construct_new_block(block_type, transaction, self.ip_address, issuer_signature, previous_signature)
+            index = self.chain[DID_index]['schemes_chain'][schema_index]['Hashes_of_revoked_credentials'][-1]['Header'][terminology.index] + 1
+        new_block = msg_constructor.construct_new_block(block_type, transaction, self.ip_address, index, issuer_signature, previous_signature)
         proof = consensus.generate_proof_of_authority(new_block)
         new_block['Header'][terminology.signature] = proof
         output.present_dictionary(new_block)
         self.add_block_to_local_chain(new_block, block_type, DID_index, schema_index)
-        self.send_block_confirmation_msg(block_type, identifier, gateway_address)
+        self.send_block_confirmation_msg(block_type, identifier, gateway_address, index)
         push_to_miners = msg_constructor.construct_internal_request(terminology.block, self.ip_address, new_block)
-        random_neighbour = random.choice(neighbors)
-        client.send(push_to_miners, random_neighbour)
+        for neighbor in neighbors:
+            client.send(push_to_miners, neighbor)
 
     def add_block_to_local_chain(self, new_block, block_type, DID_index, schema_index):
         if block_type == terminology.DID_block:
@@ -273,7 +317,7 @@ class Blockchain:
                 pickle.dump(self.chain, open_file)
                 open_file.close()
 
-    def process_unsigned_dids(self, miner_location, miners, BC_address, neighbors):
+    def process_unsigned_dids(self, miner_location, miners, BC_address, neighbors, authorized_miner):
         for index in range(len(self.unsigned_DIDs)):
             print(str(index + 1) + "- ")
             output.present_dictionary(self.unsigned_DIDs[index])
@@ -282,11 +326,11 @@ class Blockchain:
         try:
             chosen_request = int(input())
             handled_request = self.unsigned_DIDs[chosen_request - 1]
-            self.add_decision(handled_request, miner_location, miners, BC_address, neighbors)
+            self.add_decision(handled_request, miner_location, miners, BC_address, neighbors, authorized_miner)
         except Exception as e:
             print(e)
 
-    def add_decision(self, original_handled_request, miner_location, miners, BC_address, neighbors):
+    def add_decision(self, original_handled_request, miner_location, miners, BC_address, neighbors, authorized_miner):
         # print(original_handled_request)
         new_handled_request = {}
         for key in original_handled_request:
@@ -312,4 +356,4 @@ class Blockchain:
         self.pending_blocks[new_handled_request[terminology.transaction][terminology.identifier]] = {'Accredited': accredited,
                                                                                                      terminology.signature: signature,
                                                                                                      'Admin': person_who_signed_this}
-        self.handle_new_block_request(new_handled_request, miners, BC_address, neighbors, self.ip_address, miner_location)
+        self.handle_new_block_request(new_handled_request, miners, BC_address, neighbors, self.ip_address, miner_location, authorized_miner)

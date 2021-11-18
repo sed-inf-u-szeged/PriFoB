@@ -10,12 +10,13 @@ import new_encryption_module
 import my_address
 import output
 import terminology
+import data_layer_config
 
 miners = []
 address = my_address.provide_my_address()
 max_num_neighbors_per_miner = 5
 min_num_of_miners = 2
-ping_time = 5
+ping_time = data_layer_config.ping_time
 
 DIDs_under_processing = []
 schemes_under_processing = []
@@ -201,7 +202,8 @@ def ping_miners():
                     miners.remove(miner)
             ping_request = {terminology.the_type: 'ping',
                             'Num_of_miners': num_of_active_miners,
-                            'Miners': miners}
+                            'Miners': miners,
+                            'Authorized_miner': select_random_miner()}
             for miner in miners:
                 client.send(ping_request, miner[1])
             time.sleep(ping_time)
@@ -225,20 +227,24 @@ def handle_confirmation_messages(confirmation_message, miner_ip):
                         if DID_under_processing[0] == confirmation_message['block_identifier']:
                             customer = DID_under_processing[1]
                             DIDs_under_processing.remove(DID_under_processing)
+                            break
                 if confirmation_message['block_type'] == terminology.schema_block:
                     for schema_under_processing in schemes_under_processing:
                         if schema_under_processing[0] == confirmation_message['block_identifier']:
                             customer = schema_under_processing[1]
                             schemes_under_processing.remove(schema_under_processing)
+                            break
                 if confirmation_message['block_type'] == terminology.revoke_block:
                     for revoked_credential_under_processing in revoked_credentials_under_processing:
                         if revoked_credential_under_processing[0] == confirmation_message['block_identifier']:
                             customer = revoked_credential_under_processing[1]
                             revoked_credentials_under_processing.remove(revoked_credential_under_processing)
+                            break
+                index = confirmation_message[terminology.index]
                 new_confirmation_msg = msg_constructor.construct_block_confirmation_message(
                     confirmation_message['added'],
                     confirmation_message['block_type'],
-                    None, confirmation_message['block_identifier'], False)
+                    None, confirmation_message['block_identifier'], False, index)
                 client.send(new_confirmation_msg, customer)
                 break
             except Exception as e:

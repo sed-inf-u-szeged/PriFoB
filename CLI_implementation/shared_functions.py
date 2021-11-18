@@ -13,9 +13,11 @@ def validate_credential(BC_address, requester_address, selected_credential):
     try:
         did_identifier = selected_credential[terminology.credential][terminology.did_identifier]
         schema_identifier = selected_credential[terminology.credential][terminology.schema_identifier]
+        did_index = selected_credential[terminology.credential][terminology.DID_index]
+        schema_index = selected_credential[terminology.credential][terminology.schema_index]
         signature = selected_credential[terminology.signature]
         hashed_credential = new_encryption_module.hashing_function(selected_credential[terminology.credential])
-        request_validation_from_bc = msg_constructor.construct_validation_request(did_identifier, schema_identifier, signature, hashed_credential, requester_address)
+        request_validation_from_bc = msg_constructor.construct_validation_request(did_identifier, schema_identifier, did_index, schema_index, signature, hashed_credential, requester_address)
         client.send(request_validation_from_bc, BC_address)
     except Exception as e:
         print(e)

@@ -27,6 +27,7 @@ class Miner:
         self.max_num_neighbors = 5
         self.num_of_miners = 0
         self.longer_chain_at = None
+        self.authorized_miner = self.ip_address
 
     def automated_processing(self):
         self.request_to_be_miner()
@@ -55,7 +56,7 @@ class Miner:
     def respond_to_second_level_request(self, request_under_processing, requester_address):
         try:
             if request_under_processing[terminology.the_type] in terminology.transactions_labels:
-                self.my_blockchain.handle_new_block_request(request_under_processing, self.miners, self.BC_address, self.neighbors, requester_address, self.location)
+                self.my_blockchain.handle_new_block_request(request_under_processing, self.miners, self.BC_address, self.neighbors, requester_address, self.location, self.authorized_miner)
             if request_under_processing[terminology.the_type] == terminology.block:
                 self.handle_new_block(request_under_processing)
             if request_under_processing[terminology.the_type] == 'signature_validation':
@@ -80,20 +81,56 @@ class Miner:
     def handle_new_block(self, request_under_processing):
         try:
             received_block = request_under_processing['body']
-            DID_identifier, schema_identifier, revoke_identifier = blockchain.get_identifiers(received_block['Body'][terminology.transaction], received_block['Header'][terminology.the_type])
-            registered_block, DID_index, schema_index, revoke_index = self.my_blockchain.already_registered(
-                received_block['Header'][terminology.the_type], DID_identifier, schema_identifier, revoke_identifier)
-            if registered_block is None:
-                if consensus.verify_proof_of_authority(self.miners, received_block['Header']['Minter_id'],
-                                                       received_block['Body'], received_block['Header'][terminology.signature]):
-                    if self.previous_signature_is_correct(received_block['Header'][terminology.the_type], received_block['Body'][terminology.previous_signature], DID_index, schema_index):
-                        self.my_blockchain.add_block_to_local_chain(received_block, received_block['Header'][terminology.the_type], DID_index, schema_index)
-                        print('new valid block is received..!')
-                        blockchain.send_request_to_active_neighbors(request_under_processing, self.neighbors)
+            send_to_neighbors = False
+            if consensus.verify_proof_of_authority(self.miners, received_block['Header']['Minter_id'],
+                                                   received_block['Body'],
+                                                   received_block['Header'][terminology.signature]):
+                DID_identifier, schema_identifier, revoke_identifier = blockchain.get_identifiers(
+                    received_block['Body'][terminology.transaction], received_block['Header'][terminology.the_type])
+                if received_block['Header'][terminology.the_type] == terminology.DID_block:
+                    existing_block, DID_index = self.my_blockchain.DID_block_exists(DID_identifier)
+                    if existing_block and DID_index == received_block['Header'][terminology.index]:
+                        pass
                     else:
-                        print('Previous hash is incorrect')
-                else:
-                    print('a received block was found invalid')
+                        schema_index = None
+                        if self.previous_signature_is_correct(received_block['Header'][terminology.the_type],
+                                                              received_block['Body'][terminology.previous_signature],
+                                                              DID_index, schema_index):
+                            self.my_blockchain.add_block_to_local_chain(received_block,
+                                                                        received_block['Header'][terminology.the_type],
+                                                                        DID_index, schema_index)
+                            print('new valid block is received..!')
+                            blockchain.send_request_to_active_neighbors(request_under_processing, self.neighbors)
+                elif received_block['Header'][terminology.the_type] == terminology.schema_block:
+                    existing_block, schema_index = self.my_blockchain.schema_block_exists(received_block['Body'][terminology.transaction][terminology.DID_index], schema_identifier)
+                    if existing_block and schema_index == received_block['Header'][terminology.index]:
+                        pass
+                    else:
+                        if self.previous_signature_is_correct(received_block['Header'][terminology.the_type],
+                                                              received_block['Body'][terminology.previous_signature],
+                                                              received_block['Body'][terminology.transaction][terminology.DID_index], schema_index):
+                            self.my_blockchain.add_block_to_local_chain(received_block,
+                                                                        received_block['Header'][terminology.the_type],
+                                                                        received_block['Body'][terminology.transaction][terminology.DID_index], schema_index)
+                            print('new valid block is received..!')
+                            blockchain.send_request_to_active_neighbors(request_under_processing, self.neighbors)
+                elif received_block['Header'][terminology.the_type] == terminology.schema_block:
+                    existing_block, revoke_index = self.my_blockchain.revoke_block_exists(received_block['Body'][terminology.transaction][terminology.DID_index], received_block['Body'][terminology.transaction][terminology.schema_index], revoke_identifier)
+                    if existing_block and revoke_index == received_block['Header'][terminology.index]:
+                        pass
+                    else:
+                        if self.previous_signature_is_correct(received_block['Header'][terminology.the_type],
+                                                              received_block['Body'][terminology.previous_signature],
+                                                              received_block['Body'][terminology.transaction][
+                                                                  terminology.DID_index], received_block['Body'][terminology.transaction][
+                                                                  terminology.schema_index]):
+                            self.my_blockchain.add_block_to_local_chain(received_block,
+                                                                        received_block['Header'][terminology.the_type],
+                                                                        received_block['Body'][terminology.transaction][
+                                                                            terminology.DID_index], received_block['Body'][terminology.transaction][
+                                                                            terminology.DID_index])
+                            print('new valid block is received..!')
+                            blockchain.send_request_to_active_neighbors(request_under_processing, self.neighbors)
         except Exception as e:
             print(e)
 
@@ -177,6 +214,7 @@ class Miner:
             if len(self.neighbors) < self.max_num_neighbors and miner[1] not in self.neighbors and miner[1] != self.ip_address:
                 self.neighbors.append(miner[1])
         self.miners = up_to_date_miners_info
+        self.authorized_miner = request_under_processing['Authorized_miner']
 
     def request_to_be_miner(self):
         my_public_key = new_encryption_module.prepare_key_for_use(terminology.public, 'my_key')
@@ -189,21 +227,20 @@ class Miner:
         body_of_request = credential_validation_request['body']
         requester_address = body_of_request['requester_address']
         hash_of_credential = body_of_request['hash_of_credential']
-        schema_block, DID_index, schema_index, revoke_index = self.my_blockchain.already_registered(terminology.schema_block, body_of_request[terminology.did_identifier], body_of_request[terminology.schema_identifier], new_encryption_module.hashing_function(body_of_request))
-        if schema_block is not None:
-            revoke_block, revoke_index = self.my_blockchain.credential_is_revoked(DID_index, schema_index, hash_of_credential)
-            if revoke_block is None:
-                accredited_in = self.my_blockchain.chain[DID_index]['Body'][terminology.transaction]['Accredited By']
-                key = new_encryption_module.prepare_key_for_use(terminology.public, None, schema_block['Body'][terminology.transaction]['schema_public_key'])
-                is_valid = new_encryption_module.verify_signature(hash_of_credential, body_of_request[terminology.signature], key)
-                if is_valid:
-                    result = terminology.valid
-                else:
-                    result = terminology.faulty_signature
+        did_index = body_of_request[terminology.DID_index]
+        schema_index = body_of_request[terminology.schema_index]
+        # schema_block, DID_index, schema_index, revoke_index = self.my_blockchain.already_registered(terminology.schema_block, body_of_request[terminology.did_identifier], body_of_request[terminology.schema_identifier], new_encryption_module.hashing_function(body_of_request))
+        revoke_block, revoke_index = self.my_blockchain.credential_is_revoked(did_index, schema_index, hash_of_credential)
+        if revoke_block is None:
+            accredited_in = self.my_blockchain.chain[did_index]['Body'][terminology.transaction]['Accredited By']
+            key = new_encryption_module.prepare_key_for_use(terminology.public, None, self.my_blockchain.chain[did_index]['schemes_chain'][schema_index]['Body'][terminology.transaction]['schema_public_key'])
+            is_valid = new_encryption_module.verify_signature(hash_of_credential, body_of_request[terminology.signature], key)
+            if is_valid:
+                result = terminology.valid
             else:
-                result = terminology.revoked
+                result = terminology.faulty_signature
         else:
-            result = terminology.schema_not_registered
+            result = terminology.revoked
         response = msg_constructor.signature_validation_response(result,
                                                                  body_of_request[terminology.did_identifier],
                                                                  body_of_request[terminology.schema_identifier],
@@ -236,7 +273,7 @@ class Miner:
                 output.miner_admin_options(num_of_unconfirmed_DIDs)
                 option = shared_functions.input_function(['1', '2', '3', '4', '5'])
                 if option == '1':
-                    self.my_blockchain.process_unsigned_dids(self.location, self.miners, self.BC_address, self.neighbors)
+                    self.my_blockchain.process_unsigned_dids(self.location, self.miners, self.BC_address, self.neighbors, self.authorized_miner)
                 if option == '2':
                     self.local_bc_info()
                 if option == '3':
