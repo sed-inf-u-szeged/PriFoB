@@ -87,7 +87,7 @@ class Blockchain:
                 # existing_block, DID_index, schema_index, revoke_index = self.check_if_block_exists(received_block_request)
             already_signed = False
             transaction_is_ready_to_mint = False
-            issuer_signature = None
+            issuer_signature = 0
             if existing_block is None:
                 if transaction_type == terminology.DID_publication_request:
                     all_signatures_are_correct, self_signed, signed_by_all = self.check_signatures(transaction_data,
@@ -277,15 +277,16 @@ class Blockchain:
             previous_signature = self.chain[-1]['Header'][terminology.signature]
             identifier = transaction[terminology.identifier]
             index = self.chain[-1]['Header'][terminology.index] + 1
-        elif block_type == terminology.schema_block:
-            previous_signature = self.chain[DID_index]['schemes_chain'][-1]['Header'][terminology.signature]
-            identifier = new_encryption_module.hashing_function(transaction)
-            index = self.chain[DID_index]['schemes_chain'][-1]['Header'][terminology.index] + 1
         else:
-            previous_signature = self.chain[DID_index]['schemes_chain'][schema_index]['Hashes_of_revoked_credentials'][-1]['Header'][
-                terminology.signature]
-            identifier = transaction[terminology.identifier]
-            index = self.chain[DID_index]['schemes_chain'][schema_index]['Hashes_of_revoked_credentials'][-1]['Header'][terminology.index] + 1
+            if block_type == terminology.schema_block:
+                previous_signature = self.chain[DID_index]['schemes_chain'][-1]['Header'][terminology.signature]
+                identifier = new_encryption_module.hashing_function(transaction)
+                index = self.chain[DID_index]['schemes_chain'][-1]['Header'][terminology.index] + 1
+            else:
+                previous_signature = self.chain[DID_index]['schemes_chain'][schema_index]['Hashes_of_revoked_credentials'][-1]['Header'][
+                    terminology.signature]
+                identifier = transaction[terminology.identifier]
+                index = self.chain[DID_index]['schemes_chain'][schema_index]['Hashes_of_revoked_credentials'][-1]['Header'][terminology.index] + 1
         new_block = msg_constructor.construct_new_block(block_type, transaction, self.ip_address, index, issuer_signature, previous_signature)
         proof = consensus.generate_proof_of_authority(new_block)
         new_block['Header'][terminology.signature] = proof
