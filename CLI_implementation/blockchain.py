@@ -311,7 +311,6 @@ class Blockchain:
             pickle.dump(version, open_file)
             open_file.close()
 
-
     def process_unsigned_dids(self, miner_location, miners, BC_address, neighbors, authorized_miner):
         for index in range(len(self.unsigned_DIDs)):
             print(str(index + 1) + "- ")
