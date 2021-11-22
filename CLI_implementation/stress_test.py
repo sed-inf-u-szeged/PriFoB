@@ -48,6 +48,7 @@ def send_test_schemes():
         DID_identifier = DID_record[0][terminology.transaction][terminology.identifier]
         new_schema_attributes = [[random.random(), 'Mandatory'], [random.random(), 'Not Mandatory']]
         schema_data = msg_constructor.schema_block_data(DID_identifier, my_address.provide_my_address(), i, deserialized_public_key, new_schema_attributes)
+        schema_data[terminology.DID_index] = DID_record[terminology.transaction][terminology.DID_index]
         signature = shared_functions.retrieve_signature_from_saved_key(schema_data[terminology.identifier], 'test_DID_key')
         request = msg_constructor.construct_new_block_request(terminology.schema_publication_request, schema_data, signature)
         requests.append(request)
@@ -100,6 +101,7 @@ def provide_analysis():
                     if did_request[0][terminology.transaction][terminology.identifier] == message['block_identifier']:
                         elapsed_time = receiving_time - did_request[1]
                         did_response_times.append(elapsed_time)
+                        did_request[0][terminology.transaction][terminology.DID_index] = message[terminology.DID_index]
                         break
             if message['block_type'] == terminology.schema_block:
                 for schema_request in schemes_requests_list:
