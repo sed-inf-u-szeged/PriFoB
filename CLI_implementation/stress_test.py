@@ -10,7 +10,6 @@ import client
 import server
 import time
 import memory_pool
-import institution
 
 
 number_of_DIDs = int(input('How many DIDs you want to publish?\n>>'))
@@ -22,29 +21,20 @@ DIDs_requests_list = []
 schemes_requests_list = []
 credentials_list = []
 credential_validation_requests_list = []
-institutions_list = []
-
-
-def construct_institutions():
-    for number_of_institution in range(number_of_DIDs):
-        string_institution_number = str(number_of_institution)
-        private_DID, public_DID = shared_functions.select_keys('test_DID_key')
-        new_institution = institution.Institution(string_institution_number, private_DID, public_DID)
-        institutions_list.append(new_institution)
+private_key, public_key = new_encryption_module.generate_PKI_keys('test_DID_key')
 
 
 def send_test_DIDs():
     my_public_key = new_encryption_module.prepare_key_for_use(terminology.public, 'test_DID_key')
-    # deserialized_public_key = new_encryption_module.deserialize_key(my_public_key)
-    # requests = []
-    for body in institutions_list:
-        body.publish_my_DID()
-    #     block_data = msg_constructor.new_did_transaction(i, my_address.provide_my_address(), deserialized_public_key)
-    #     request = msg_constructor.construct_new_block_request(terminology.DID_publication_request, block_data)
-    #     requests.append(request)
-    # for i in range(len(requests)):
-    #     client.send(requests[i], BC_address)
-    #     DIDs_requests_list.append([requests[i], time.time()])
+    deserialized_public_key = new_encryption_module.deserialize_key(my_public_key)
+    requests = []
+    for i in range(number_of_DIDs):
+        block_data = msg_constructor.new_did_transaction(i, my_address.provide_my_address(), deserialized_public_key)
+        request = msg_constructor.construct_new_block_request(terminology.DID_publication_request, block_data)
+        requests.append(request)
+    for i in range(len(requests)):
+        client.send(requests[i], BC_address)
+        DIDs_requests_list.append([requests[i], time.time()])
         # time.sleep(response_wait_time/number_of_DIDs)
     print('All DID requests have been sent.')
 
