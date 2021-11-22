@@ -48,7 +48,7 @@ def send_test_schemes():
         DID_identifier = DID_record[0][terminology.transaction][terminology.identifier]
         new_schema_attributes = [[random.random(), 'Mandatory'], [random.random(), 'Not Mandatory']]
         schema_data = msg_constructor.schema_block_data(DID_identifier, my_address.provide_my_address(), i, deserialized_public_key, new_schema_attributes)
-        schema_data[terminology.DID_index] = DID_record[terminology.transaction][terminology.DID_index]
+        schema_data[terminology.DID_index] = DID_record[0][terminology.transaction][terminology.DID_index]
         signature = shared_functions.retrieve_signature_from_saved_key(schema_data[terminology.identifier], 'test_DID_key')
         request = msg_constructor.construct_new_block_request(terminology.schema_publication_request, schema_data, signature)
         requests.append(request)
