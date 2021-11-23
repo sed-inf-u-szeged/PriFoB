@@ -112,7 +112,7 @@ def send_test_schemes():
 
 
 def generate_test_credentials():
-    for i in range(number_of_credentials):
+    for i in range(len(schemes_requests_list)):
         schema_record = random.choice(schemes_requests_list)
         schema_label = str(random.randint(0, number_of_schemes))
         inst_name = schema_record[2][terminology.transaction]['institution_name']
