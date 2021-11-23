@@ -42,7 +42,8 @@ def send_test_DIDs():
         DIDs_requests_list.append([requests[i], time.time()])
         # time.sleep(response_wait_time/number_of_DIDs)
     print('All DID requests have been sent.')
-    next_step = input('press enter to process the responses')
+    print('press enter to process the responses\n')
+    next_step = input()
     while memory_pool.received_msgs.qsize() > 0:
         msg = memory_pool.received_msgs.get()
         message = msg[0]
@@ -53,7 +54,7 @@ def send_test_DIDs():
                     if did_request[0][terminology.transaction][terminology.identifier] == message['block_identifier']:
                         elapsed_time = receiving_time - did_request[1]
                         did_response_times.append(elapsed_time)
-                        did_request[0][terminology.transaction][terminology.DID_index] = message[terminology.DID_index]
+                        did_request[0][terminology.transaction][terminology.DID_index] = message[terminology.index]
                         break
     print('responses have been processed')
     total_did_response_time = 0
