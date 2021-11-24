@@ -98,7 +98,6 @@ class Blockchain:
                                                                                                    authorized_miner)
 
                     if not self_signed:
-                        print('here')
                         if transaction_data[terminology.identifier] in self.pending_blocks:
                             already_signed = True
                             transaction_data = self.auto_sign(miner_location, transaction_data)
@@ -154,9 +153,10 @@ class Blockchain:
         #                   self.pending_blocks[transaction_data[terminology.identifier]]['Admin'],
         #                   self.pending_blocks[transaction_data[terminology.identifier]][terminology.signature]]
         if self.pending_blocks[transaction_data[terminology.identifier]]['Accredited'] == 'Yes':
-            transaction_data['Accredited By'].append(signature_info)
+            transaction_data[terminology.transaction]['Accredited By'][miner_location] = signature_info
+            # transaction_data['Accredited By'].append(signature_info)
         else:
-            transaction_data[terminology.transaction]['Not Accredited by'].append(signature_info)
+            transaction_data[terminology.transaction]['Not Accredited by'][miner_location] = signature_info
         return transaction_data
 
     # def check_if_block_exists(self, received_block_request):
