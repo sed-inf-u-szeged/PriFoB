@@ -327,6 +327,7 @@ class Blockchain:
                 index = \
                     self.chain[DID_index]['schemes_chain'][schema_index]['Hashes_of_revoked_credentials'][-1]['Header'][
                         terminology.index] + 1
+        print('here')
         new_block = msg_constructor.construct_new_block(block_type, transaction, self.ip_address, index,
                                                         issuer_signature, previous_signature)
         proof = consensus.generate_proof_of_authority(new_block)
@@ -399,6 +400,5 @@ class Blockchain:
             'Accredited': accredited,
             terminology.signature: signature,
             'Admin': person_who_signed_this}
-        print('here')
         self.handle_new_block_request(new_handled_request, miners, BC_address, neighbors, self.ip_address,
                                       miner_location, authorized_miner)
