@@ -114,7 +114,6 @@ class Blockchain:
                                 random_neighbor = random.choice(neighbors)
                                 client.send(received_block_request, random_neighbor)
                     else:
-                        print('here')
                         if signed_by_all:
                             if all_signatures_are_correct:
                                 transaction_is_ready_to_mint = True
@@ -206,6 +205,7 @@ class Blockchain:
                     verification_key = new_encryption_module.prepare_key_for_use(terminology.public, None,
                                                                                  active_miners[key][terminology.key])
                     if active_miners[key][terminology.location] in transaction_data['Accredited By']:
+                        print('here')
                         signature_is_correct = new_encryption_module.verify_signature(hash_to_be_utilized,
                                                                                       transaction_data['Accredited By'][
                                                                                           active_miners[key][
@@ -226,7 +226,7 @@ class Blockchain:
                     if not signature_is_correct:
                         print('Miner: ' + key + ' is suspected to be malicious and will be reported.')
                         all_signatures_are_correct = False
-                    break
+                        break
             #
             # else:
             #     for signature in signatures:
