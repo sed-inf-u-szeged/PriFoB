@@ -97,6 +97,7 @@ class Blockchain:
                                                                                                    miner_location,
                                                                                                    authorized_miner)
 
+                    print('here')
                     if not self_signed:
                         if transaction_data[terminology.identifier] in self.pending_blocks:
                             already_signed = True
@@ -310,7 +311,6 @@ class Blockchain:
 
     def mint_and_add_block(self, transaction, gateway_address, block_type, neighbors, DID_index, schema_index,
                            revoke_index, issuer_signature):
-        print('here')
         if block_type == terminology.DID_block:
             previous_signature = self.chain[-1]['Header'][terminology.signature]
             identifier = transaction[terminology.identifier]
