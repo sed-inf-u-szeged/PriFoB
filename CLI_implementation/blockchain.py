@@ -144,9 +144,12 @@ class Blockchain:
             print(e)
 
     def auto_sign(self, miner_location, transaction_data):
-        signature_info = [miner_location, self.ip_address,
-                          self.pending_blocks[transaction_data[terminology.identifier]]['Admin'],
-                          self.pending_blocks[transaction_data[terminology.identifier]][terminology.signature]]
+        signature_info = {terminology.address: self.ip_address,
+                          terminology.person_who_signed_this: self.pending_blocks[transaction_data[terminology.identifier]]['Admin'],
+                          terminology.signature: self.pending_blocks[transaction_data[terminology.identifier]][terminology.signature]}
+        # signature_info = [miner_location, self.ip_address,
+        #                   self.pending_blocks[transaction_data[terminology.identifier]]['Admin'],
+        #                   self.pending_blocks[transaction_data[terminology.identifier]][terminology.signature]]
         if self.pending_blocks[transaction_data[terminology.identifier]]['Accredited'] == 'Yes':
             transaction_data['Accredited By'].append(signature_info)
         else:
@@ -192,8 +195,7 @@ class Blockchain:
             if len(active_miners) <= len(transaction_data['Accredited By']) + len(
                     transaction_data['Not Accredited by']):
                 signed_by_all = True
-            if transaction_data['Accredited By'][miner_location] or transaction_data['Not Accredited by'][
-                miner_location]:
+            if transaction_data['Accredited By'][miner_location] or transaction_data['Not Accredited by'][miner_location]:
                 self_signed = True
             if authorized_miner == self.ip_address and signed_by_all:
                 for key in active_miners:
