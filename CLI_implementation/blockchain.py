@@ -91,11 +91,12 @@ class Blockchain:
             issuer_signature = 0
             if existing_block is None:
                 if transaction_type == terminology.DID_publication_request:
+                    print("here")
                     all_signatures_are_correct, self_signed, signed_by_all = self.check_signatures(transaction_data,
                                                                                                    active_miners,
                                                                                                    miner_location,
                                                                                                    authorized_miner)
-                    print("here")
+
                     if not self_signed:
                         if self.pending_blocks[transaction_data[terminology.identifier]]:
                             already_signed = True
