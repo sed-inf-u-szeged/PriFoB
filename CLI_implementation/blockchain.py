@@ -153,10 +153,10 @@ class Blockchain:
         #                   self.pending_blocks[transaction_data[terminology.identifier]]['Admin'],
         #                   self.pending_blocks[transaction_data[terminology.identifier]][terminology.signature]]
         if self.pending_blocks[transaction_data[terminology.identifier]]['Accredited'] == 'Yes':
-            transaction_data[terminology.transaction]['Accredited By'][miner_location] = signature_info
+            transaction_data['Accredited By'][miner_location] = signature_info
             # transaction_data['Accredited By'].append(signature_info)
         else:
-            transaction_data[terminology.transaction]['Not Accredited by'][miner_location] = signature_info
+            transaction_data['Not Accredited by'][miner_location] = signature_info
         return transaction_data
 
     # def check_if_block_exists(self, received_block_request):
@@ -310,6 +310,7 @@ class Blockchain:
 
     def mint_and_add_block(self, transaction, gateway_address, block_type, neighbors, DID_index, schema_index,
                            revoke_index, issuer_signature):
+        print('here')
         if block_type == terminology.DID_block:
             previous_signature = self.chain[-1]['Header'][terminology.signature]
             identifier = transaction[terminology.identifier]
@@ -327,7 +328,7 @@ class Blockchain:
                 index = \
                     self.chain[DID_index]['schemes_chain'][schema_index]['Hashes_of_revoked_credentials'][-1]['Header'][
                         terminology.index] + 1
-        print('here')
+
         new_block = msg_constructor.construct_new_block(block_type, transaction, self.ip_address, index,
                                                         issuer_signature, previous_signature)
         proof = consensus.generate_proof_of_authority(new_block)
