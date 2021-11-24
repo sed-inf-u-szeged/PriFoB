@@ -207,15 +207,13 @@ class Blockchain:
                     if active_miners[key][terminology.location] in transaction_data['Accredited By']:
                         print('here')
                         signature_is_correct = new_encryption_module.verify_signature(hash_to_be_utilized,
-                                                                                      transaction_data['Accredited By'][active_miners[terminology.location][terminology.signature]],
+                                                                                      transaction_data['Accredited By'][active_miners[key][terminology.location]][terminology.signature],
                                                                                       verification_key)
                     if active_miners[key][terminology.location] in transaction_data['Not Accredited by']:
                         signature_is_correct = new_encryption_module.verify_signature(hash_to_be_utilized,
                                                                                       transaction_data[
                                                                                           'Not Accredited by'][
-                                                                                          active_miners[
-                                                                                              terminology.location][
-                                                                                              terminology.signature]],
+                                                                                          active_miners[key][terminology.location]][terminology.signature],
                                                                                       verification_key)
                         # signature_is_correct = new_encryption_module.verify_signature(hash_to_be_utilized,
                         #                                                               signature[3],
