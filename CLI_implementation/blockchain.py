@@ -95,6 +95,7 @@ class Blockchain:
                                                                                                    active_miners,
                                                                                                    miner_location,
                                                                                                    authorized_miner)
+                    print("here")
                     if not self_signed:
                         if self.pending_blocks[transaction_data[terminology.identifier]]:
                             already_signed = True
