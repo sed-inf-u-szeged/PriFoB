@@ -91,7 +91,7 @@ class Blockchain:
             issuer_signature = 0
             if existing_block is None:
                 if transaction_type == terminology.DID_publication_request:
-                    print("here")
+
                     all_signatures_are_correct, self_signed, signed_by_all = self.check_signatures(transaction_data,
                                                                                                    active_miners,
                                                                                                    miner_location,
@@ -197,7 +197,7 @@ class Blockchain:
             if len(active_miners) <= len(transaction_data['Accredited By']) + len(
                     transaction_data['Not Accredited by']):
                 signed_by_all = True
-            if transaction_data['Accredited By'][miner_location] or transaction_data['Not Accredited by'][miner_location]:
+            if miner_location in transaction_data['Accredited By'] or miner_location in transaction_data['Not Accredited by']:
                 self_signed = True
             if authorized_miner == self.ip_address and signed_by_all:
                 for key in active_miners:
@@ -232,6 +232,7 @@ class Blockchain:
             #         if signature[1] == str(self.ip_address):
             #             self_signed = True
             #             break
+            print('here')
             return all_signatures_are_correct, self_signed, signed_by_all
         except Exception as e:
             print(e)
