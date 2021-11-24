@@ -96,8 +96,6 @@ class Blockchain:
                                                                                                    active_miners,
                                                                                                    miner_location,
                                                                                                    authorized_miner)
-
-                    print('here')
                     if not self_signed:
                         if transaction_data[terminology.identifier] in self.pending_blocks:
                             already_signed = True
@@ -116,6 +114,7 @@ class Blockchain:
                                 random_neighbor = random.choice(neighbors)
                                 client.send(received_block_request, random_neighbor)
                     else:
+                        print('here')
                         if signed_by_all:
                             if all_signatures_are_correct:
                                 transaction_is_ready_to_mint = True
