@@ -218,7 +218,8 @@ class Miner:
         # memory_pool.msgs_to_be_sent.put([response, requester])
         up_to_date_miners_info = {}
         for miner in request_under_processing['Miners']:
-            up_to_date_miners_info[miner[1]] = miner[4]
+            up_to_date_miners_info[miner[1]] = {terminology.key: miner[4],
+                                                terminology.location: miner[0]}
             if len(self.neighbors) < self.max_num_neighbors and miner[1] not in self.neighbors and miner[1] != self.ip_address:
                 self.neighbors.append(miner[1])
         self.miners = up_to_date_miners_info
@@ -238,7 +239,7 @@ class Miner:
         did_index = body_of_request[terminology.DID_index]
         schema_index = body_of_request[terminology.schema_index]
         # schema_block, DID_index, schema_index, revoke_index = self.my_blockchain.already_registered(terminology.schema_block, body_of_request[terminology.did_identifier], body_of_request[terminology.schema_identifier], new_encryption_module.hashing_function(body_of_request))
-        revoke_block, revoke_index = self.my_blockchain.credential_is_revoked(did_index, schema_index, hash_of_credential)
+        revoke_block, revoke_index = self.my_blockchain.revoke_block_exists(did_index, schema_index, hash_of_credential)
         if revoke_block is None:
             accredited_in = self.my_blockchain.chain[did_index]['Body'][terminology.transaction]['Accredited By']
             key = new_encryption_module.prepare_key_for_use(terminology.public, None, self.my_blockchain.chain[did_index]['schemes_chain'][schema_index]['Body'][terminology.transaction]['schema_public_key'])

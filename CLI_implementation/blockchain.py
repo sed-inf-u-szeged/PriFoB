@@ -5,14 +5,14 @@ import new_encryption_module
 import my_address
 import consensus
 import output
-import copy
 import shared_functions
 import terminology
 import pickle
 
 
 def fully_signed(tx, num_miners):
-    return len(tx[terminology.transaction]['Accredited By']) + len(tx[terminology.transaction]['Not Accredited by']) >= num_miners
+    return len(tx[terminology.transaction]['Accredited By']) + len(
+        tx[terminology.transaction]['Not Accredited by']) >= num_miners
 
 
 def send_request_to_active_neighbors(request, neighbors):
@@ -65,7 +65,8 @@ class Blockchain:
                 total_revoked_credentials += len(schema['Hashes_of_revoked_credentials']) - 1
         return number_of_DIDs, number_of_Schemes, total_revoked_credentials
 
-    def handle_new_block_request(self, received_block_request, active_miners, gateway_address, neighbors, request_received_from, miner_location, authorized_miner):
+    def handle_new_block_request(self, received_block_request, active_miners, gateway_address, neighbors,
+                                 request_received_from, miner_location, authorized_miner):
         try:
             revoke_index = None
             schema_index = None
@@ -91,18 +92,19 @@ class Blockchain:
             if existing_block is None:
                 if transaction_type == terminology.DID_publication_request:
                     all_signatures_are_correct, self_signed, signed_by_all = self.check_signatures(transaction_data,
-                                                                                                   active_miners)
+                                                                                                   active_miners,
+                                                                                                   miner_location,
+                                                                                                   authorized_miner)
                     if not self_signed:
-                        for key in self.pending_blocks:
-                            if key == transaction_data[terminology.identifier]:
-                                already_signed = True
-                                transaction_data = self.auto_sign(miner_location, transaction_data)
-                                break
+                        if self.pending_blocks[transaction_data[terminology.identifier]]:
+                            already_signed = True
+                            transaction_data = self.auto_sign(miner_location, transaction_data)
                         if not already_signed:
                             if not self.automatic_signing:
                                 self.unsigned_DIDs.append(received_block_request)
                             else:
-                                self.add_decision(received_block_request, miner_location, active_miners, gateway_address, neighbors, authorized_miner)
+                                self.add_decision(received_block_request, miner_location, active_miners,
+                                                  gateway_address, neighbors, authorized_miner)
                         else:
                             if signed_by_all:
                                 if all_signatures_are_correct:
@@ -120,17 +122,24 @@ class Blockchain:
                 else:
                     issuer_signature = received_block_request[terminology.signature]
                     if transaction_type == terminology.schema_publication_request:
-                        transaction_is_ready_to_mint = self.verify_this_schema_transaction(DID_index, transaction_data, issuer_signature)
+                        transaction_is_ready_to_mint = self.verify_this_schema_transaction(DID_index, transaction_data,
+                                                                                           issuer_signature)
                     else:
-                        transaction_is_ready_to_mint = self.verify_this_revoke_transaction(DID_index, schema_index, transaction_data, received_block_request)
+                        transaction_is_ready_to_mint = self.verify_this_revoke_transaction(DID_index, schema_index,
+                                                                                           transaction_data,
+                                                                                           received_block_request)
                 if transaction_is_ready_to_mint:
                     if authorized_miner == self.ip_address:
-                        self.mint_and_add_block(transaction_data, gateway_address, block_type, neighbors, DID_index, schema_index, revoke_index, issuer_signature)
+                        self.mint_and_add_block(transaction_data, gateway_address, block_type, neighbors, DID_index,
+                                                schema_index, revoke_index, issuer_signature)
                     else:
                         client.send(received_block_request, authorized_miner)
             else:
                 if request_received_from == gateway_address:
-                    self.send_block_confirmation_msg(existing_block['Header'][terminology.the_type], existing_block['Body'][terminology.transaction][terminology.identifier], gateway_address, existing_block['Header'][terminology.index])
+                    self.send_block_confirmation_msg(existing_block['Header'][terminology.the_type],
+                                                     existing_block['Body'][terminology.transaction][
+                                                         terminology.identifier], gateway_address,
+                                                     existing_block['Header'][terminology.index])
         except Exception as e:
             print(e)
 
@@ -144,15 +153,15 @@ class Blockchain:
             transaction_data[terminology.transaction]['Not Accredited by'].append(signature_info)
         return transaction_data
 
-    def check_if_block_exists(self, received_block_request):
-        transaction_data = received_block_request[terminology.transaction]
-        transaction_type = received_block_request[terminology.the_type]
-        DID_identifier, schema_identifier, revoke_identifier = get_identifiers(transaction_data, transaction_type)
-        existing_block, DID_index, schema_index, revoke_index = self.already_registered(transaction_type,
-                                                                                        DID_identifier,
-                                                                                        schema_identifier,
-                                                                                        revoke_identifier)
-        return existing_block, DID_index, schema_index, revoke_index
+    # def check_if_block_exists(self, received_block_request):
+    #     transaction_data = received_block_request[terminology.transaction]
+    #     transaction_type = received_block_request[terminology.the_type]
+    #     DID_identifier, schema_identifier, revoke_identifier = get_identifiers(transaction_data, transaction_type)
+    #     existing_block, DID_index, schema_index, revoke_index = self.already_registered(transaction_type,
+    #                                                                                     DID_identifier,
+    #                                                                                     schema_identifier,
+    #                                                                                     revoke_identifier)
+    #     return existing_block, DID_index, schema_index, revoke_index
 
     def verify_this_schema_transaction(self, DID_index, transaction_data, issuer_signature):
         org_key = self.chain[DID_index]['Body'][terminology.transaction]['institution_public_key']
@@ -164,72 +173,94 @@ class Blockchain:
         schema_key = self.chain[DID_index]['schemes_chain'][schema_index]['Body'][terminology.transaction][
             'schema_public_key']
         prepared_key = new_encryption_module.prepare_key_for_use(terminology.public, None, schema_key)
-        return new_encryption_module.verify_signature(transaction_data[terminology.identifier], received_block_request[terminology.signature], prepared_key)
+        return new_encryption_module.verify_signature(transaction_data[terminology.identifier],
+                                                      received_block_request[terminology.signature], prepared_key)
 
     def send_block_confirmation_msg(self, block_type, block_identifier, gateway_address, index):
-        confirmation_msg = msg_constructor.construct_block_confirmation_message(True, block_type, self.ip_address, block_identifier, True, index)
+        confirmation_msg = msg_constructor.construct_block_confirmation_message(True, block_type, self.ip_address,
+                                                                                block_identifier, True, index)
         client.send(confirmation_msg, gateway_address)
 
-    def check_signatures(self, transaction_data, active_miners):
+    def check_signatures(self, transaction_data, active_miners, miner_location, authorized_miner):
         try:
             all_signatures_are_correct = True
             self_signed = False
             signed_by_all = False
-            signatures = copy.deepcopy(transaction_data['Accredited By'])
-            signatures.extend(transaction_data['Not Accredited by'])
+            # signatures = copy.deepcopy(transaction_data['Accredited By'])
+            # signatures.extend(transaction_data['Not Accredited by'])
             hash_to_be_utilized = new_encryption_module.hashing_function(transaction_data[terminology.identifier])
-            if len(active_miners) <= len(signatures):
+            if len(active_miners) <= len(transaction_data['Accredited By']) + len(
+                    transaction_data['Not Accredited by']):
                 signed_by_all = True
-                for signature in signatures:
-                    if signature[1] == str(self.ip_address):
-                        self_signed = True
-                    for key in active_miners:
-                        if key == signature[1]:
-                            verification_key = new_encryption_module.prepare_key_for_use(terminology.public, None,
-                                                                                         active_miners[key])
-                            signature_is_correct = new_encryption_module.verify_signature(hash_to_be_utilized,
-                                                                                          signature[3],
-                                                                                          verification_key)
-                            if not signature_is_correct:
-                                print('Miner: ' + key + ' is suspected to be malicious and will be reported.')
-                                all_signatures_are_correct = False
-                            break
-            else:
-                for signature in signatures:
-                    if signature[1] == str(self.ip_address):
-                        self_signed = True
-                        break
+            if transaction_data['Accredited By'][miner_location] or transaction_data['Not Accredited by'][
+                miner_location]:
+                self_signed = True
+            if authorized_miner == self.ip_address and signed_by_all:
+                for key in active_miners:
+                    signature_is_correct = False
+                    verification_key = new_encryption_module.prepare_key_for_use(terminology.public, None,
+                                                                                 active_miners[key][terminology.key])
+                    if transaction_data['Accredited By'][active_miners[key][terminology.location]]:
+                        signature_is_correct = new_encryption_module.verify_signature(hash_to_be_utilized,
+                                                                                      transaction_data['Accredited By'][
+                                                                                          active_miners[key][
+                                                                                              terminology.location][
+                                                                                              terminology.signature]],
+                                                                                      verification_key)
+                    if transaction_data['Not Accredited by'][active_miners[key][terminology.location]]:
+                        signature_is_correct = new_encryption_module.verify_signature(hash_to_be_utilized,
+                                                                                      transaction_data[
+                                                                                          'Not Accredited by'][
+                                                                                          active_miners[key][
+                                                                                              terminology.location][
+                                                                                              terminology.signature]],
+                                                                                      verification_key)
+                        # signature_is_correct = new_encryption_module.verify_signature(hash_to_be_utilized,
+                        #                                                               signature[3],
+                        #                                                               verification_key)
+                    if not signature_is_correct:
+                        print('Miner: ' + key + ' is suspected to be malicious and will be reported.')
+                        all_signatures_are_correct = False
+                    break
+            #
+            # else:
+            #     for signature in signatures:
+            #         if signature[1] == str(self.ip_address):
+            #             self_signed = True
+            #             break
             return all_signatures_are_correct, self_signed, signed_by_all
         except Exception as e:
             print(e)
 
     def unsigned_did_transaction_already_received(self, received_request):
         for unsigned_did in self.unsigned_DIDs:
-            if unsigned_did[terminology.transaction][terminology.identifier] == received_request[terminology.transaction][terminology.identifier]:
+            if unsigned_did[terminology.transaction][terminology.identifier] == \
+                    received_request[terminology.transaction][terminology.identifier]:
                 return True
         return False
 
-    def already_registered(self, transaction_type, DID_identifier, schema_identifier, revoke_identifier):
-        block_to_return = None
-        DID_index = None
-        schema_index = None
-        revoke_index = None
-        for i in range(len(self.chain)):
-            if self.chain[i]['Body'][terminology.transaction][terminology.identifier] == DID_identifier:
-                DID_index = i
-                if transaction_type == terminology.DID_publication_request or transaction_type == terminology.DID_block:
-                    block_to_return = self.chain[i]
-                else:
-                    for s in range(len(self.chain[i]['schemes_chain'])):
-                        if self.chain[i]['schemes_chain'][s]['Body'][terminology.transaction][terminology.identifier] == schema_identifier:
-                            schema_index = s
-                            if transaction_type == terminology.schema_publication_request or transaction_type == terminology.schema_block:
-                                block_to_return = self.chain[i]['schemes_chain'][s]
-                            elif transaction_type == terminology.revoke_request or transaction_type == terminology.revoke_block:
-                                block_to_return, revoke_index = self.credential_is_revoked(DID_index, schema_index, revoke_identifier)
-                            break
-                break
-        return block_to_return, DID_index, schema_index, revoke_index
+    # def already_registered(self, transaction_type, DID_identifier, schema_identifier, revoke_identifier):
+    #     block_to_return = None
+    #     DID_index = None
+    #     schema_index = None
+    #     revoke_index = None
+    #     for i in range(len(self.chain)):
+    #         if self.chain[i]['Body'][terminology.transaction][terminology.identifier] == DID_identifier:
+    #             DID_index = i
+    #             if transaction_type == terminology.DID_publication_request or transaction_type == terminology.DID_block:
+    #                 block_to_return = self.chain[i]
+    #                 break
+    #             else:
+    #                 for s in range(len(self.chain[i]['schemes_chain'])):
+    #                     if self.chain[i]['schemes_chain'][s]['Body'][terminology.transaction][terminology.identifier] == schema_identifier:
+    #                         schema_index = s
+    #                         if transaction_type == terminology.schema_publication_request or transaction_type == terminology.schema_block:
+    #                             block_to_return = self.chain[i]['schemes_chain'][s]
+    #                             break
+    #                         elif transaction_type == terminology.revoke_request or transaction_type == terminology.revoke_block:
+    #                             block_to_return, revoke_index = self.credential_is_revoked(DID_index, schema_index, revoke_identifier)
+    #                             break
+    #     return block_to_return, DID_index, schema_index, revoke_index
 
     def DID_block_exists(self, DID_identifier):
         block_to_return = None
@@ -261,18 +292,19 @@ class Blockchain:
                 break
         return block_to_return, revoke_index
 
-    def credential_is_revoked(self, did_index, schema_index, revoke_identifier):
-        block_to_return = None
-        revoke_index = None
-        target_block = self.chain[did_index]['schemes_chain'][schema_index]
-        for v in range(len(target_block['Hashes_of_revoked_credentials'])):
-            if target_block['Hashes_of_revoked_credentials'][v]['Body'][terminology.transaction][terminology.identifier] == revoke_identifier:
-                block_to_return = target_block['Hashes_of_revoked_credentials'][v]
-                revoke_index = v
-                break
-        return block_to_return, revoke_index
+    # def credential_is_revoked(self, did_index, schema_index, revoke_identifier):
+    #     block_to_return = None
+    #     revoke_index = None
+    #     target_block = self.chain[did_index]['schemes_chain'][schema_index]
+    #     for v in range(len(target_block['Hashes_of_revoked_credentials'])):
+    #         if target_block['Hashes_of_revoked_credentials'][v]['Body'][terminology.transaction][terminology.identifier] == revoke_identifier:
+    #             block_to_return = target_block['Hashes_of_revoked_credentials'][v]
+    #             revoke_index = v
+    #             break
+    #     return block_to_return, revoke_index
 
-    def mint_and_add_block(self, transaction, gateway_address, block_type, neighbors, DID_index, schema_index, revoke_index, issuer_signature):
+    def mint_and_add_block(self, transaction, gateway_address, block_type, neighbors, DID_index, schema_index,
+                           revoke_index, issuer_signature):
         if block_type == terminology.DID_block:
             previous_signature = self.chain[-1]['Header'][terminology.signature]
             identifier = transaction[terminology.identifier]
@@ -283,11 +315,15 @@ class Blockchain:
                 identifier = new_encryption_module.hashing_function(transaction)
                 index = self.chain[DID_index]['schemes_chain'][-1]['Header'][terminology.index] + 1
             else:
-                previous_signature = self.chain[DID_index]['schemes_chain'][schema_index]['Hashes_of_revoked_credentials'][-1]['Header'][
-                    terminology.signature]
+                previous_signature = \
+                    self.chain[DID_index]['schemes_chain'][schema_index]['Hashes_of_revoked_credentials'][-1]['Header'][
+                        terminology.signature]
                 identifier = transaction[terminology.identifier]
-                index = self.chain[DID_index]['schemes_chain'][schema_index]['Hashes_of_revoked_credentials'][-1]['Header'][terminology.index] + 1
-        new_block = msg_constructor.construct_new_block(block_type, transaction, self.ip_address, index, issuer_signature, previous_signature)
+                index = \
+                    self.chain[DID_index]['schemes_chain'][schema_index]['Hashes_of_revoked_credentials'][-1]['Header'][
+                        terminology.index] + 1
+        new_block = msg_constructor.construct_new_block(block_type, transaction, self.ip_address, index,
+                                                        issuer_signature, previous_signature)
         proof = consensus.generate_proof_of_authority(new_block)
         new_block['Header'][terminology.signature] = proof
         output.present_dictionary(new_block)
@@ -300,7 +336,8 @@ class Blockchain:
     def add_block_to_local_chain(self, new_block, block_type, DID_index, schema_index):
         if block_type == terminology.DID_block:
             self.chain.append(new_block)
-            removed_pending_block_request = self.pending_blocks.pop(new_block['Body'][terminology.transaction][terminology.identifier])
+            removed_pending_block_request = self.pending_blocks.pop(
+                new_block['Body'][terminology.transaction][terminology.identifier])
         if block_type == terminology.schema_block:
             self.chain[DID_index]['schemes_chain'].append(new_block)
         if block_type == terminology.revoke_block:
@@ -337,18 +374,25 @@ class Blockchain:
         else:
             decision = 'y'
             person_who_signed_this = 'General Registrar'
-        signature = shared_functions.retrieve_signature_from_saved_key(original_handled_request[terminology.transaction][terminology.identifier], 'my_key')
-        signature_info = [miner_location, self.ip_address, person_who_signed_this, signature]
+        signature = shared_functions.retrieve_signature_from_saved_key(
+            original_handled_request[terminology.transaction][terminology.identifier], 'my_key')
+        signature_info = {terminology.address: self.ip_address,
+                          terminology.person_who_signed_this: person_who_signed_this,
+                          terminology.signature: signature}
+        # signature_info = [miner_location, self.ip_address, person_who_signed_this, signature]
         if decision in ['Y', 'y']:
-            new_handled_request[terminology.transaction]['Accredited By'].append(signature_info)
+            new_handled_request[terminology.transaction]['Accredited By'][miner_location] = signature_info
             accredited = 'Yes'
         else:
-            new_handled_request[terminology.transaction]['Not Accredited by'].append(signature_info)
+            new_handled_request[terminology.transaction]['Not Accredited by'][miner_location] = signature_info
+            # new_handled_request[terminology.transaction]['Not Accredited by'].append(signature_info)
             accredited = 'No'
         # something is wrong here as the original_handled_request is not in the list. maybe because the use of deepcopy
         if not self.automatic_signing:
             self.unsigned_DIDs.remove(original_handled_request)
-        self.pending_blocks[new_handled_request[terminology.transaction][terminology.identifier]] = {'Accredited': accredited,
-                                                                                                     terminology.signature: signature,
-                                                                                                     'Admin': person_who_signed_this}
-        self.handle_new_block_request(new_handled_request, miners, BC_address, neighbors, self.ip_address, miner_location, authorized_miner)
+        self.pending_blocks[new_handled_request[terminology.transaction][terminology.identifier]] = {
+            'Accredited': accredited,
+            terminology.signature: signature,
+            'Admin': person_who_signed_this}
+        self.handle_new_block_request(new_handled_request, miners, BC_address, neighbors, self.ip_address,
+                                      miner_location, authorized_miner)

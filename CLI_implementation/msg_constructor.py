@@ -7,8 +7,8 @@ def new_did_transaction(org_name, org_address, org_pub_key):
     transaction = {terminology.identifier: org_name,
                    'institution_address': org_address,
                    'institution_public_key': org_pub_key,
-                   'Accredited By': [],
-                   'Not Accredited by': []
+                   'Accredited By': {},
+                   'Not Accredited by': {}
                    }
     return transaction
 
