@@ -98,7 +98,8 @@ class Blockchain:
                                                                                                    authorized_miner)
 
                     if not self_signed:
-                        if self.pending_blocks[transaction_data[terminology.identifier]]:
+                        print('here')
+                        if transaction_data[terminology.identifier] in self.pending_blocks:
                             already_signed = True
                             transaction_data = self.auto_sign(miner_location, transaction_data)
                         if not already_signed:
@@ -232,7 +233,6 @@ class Blockchain:
             #         if signature[1] == str(self.ip_address):
             #             self_signed = True
             #             break
-            print('here')
             return all_signatures_are_correct, self_signed, signed_by_all
         except Exception as e:
             print(e)
