@@ -8,6 +8,7 @@ import output
 import shared_functions
 import terminology
 import pickle
+import bisect_test
 
 
 def fully_signed(tx, num_miners):
@@ -76,20 +77,26 @@ class Blockchain:
             if transaction_type == terminology.schema_publication_request:
                 block_type = terminology.schema_block
                 DID_index = transaction_data[terminology.DID_index]
-                existing_block, schema_index = self.schema_block_exists(DID_index, schema_identifier)
+                block_index = bisect_test.get_index(bisect_test.sorted_schemes, schema_identifier)
+                existing_block = self.chain[DID_index]['schemes_chain'][block_index]
+                # existing_block, schema_index = self.schema_block_exists(DID_index, schema_identifier)
             elif transaction_type == terminology.revoke_request:
                 block_type = terminology.revoke_block
                 DID_index = transaction_data[terminology.DID_index]
                 schema_index = transaction_data[terminology.schema_index]
-                existing_block, revoke_index = self.revoke_block_exists(DID_index, schema_index, revoke_identifier)
+                block_index = bisect_test.get_index(bisect_test.sorted_revoked_cres, revoke_identifier)
+                existing_block = self.chain[DID_index]['schemes_chain'][schema_index]['Hashes_of_revoked_credentials'][block_index]
+                # existing_block, revoke_index = self.revoke_block_exists(DID_index, schema_index, revoke_identifier)
             else:
                 block_type = terminology.DID_block
-                existing_block, DID_index = self.DID_block_exists(DID_identifier)
+                block_index = bisect_test.get_index(bisect_test.sorted_DIDs, DID_identifier)
+                existing_block = self.chain[block_index]
+                # existing_block, DID_index = self.DID_block_exists(DID_identifier)
                 # existing_block, DID_index, schema_index, revoke_index = self.check_if_block_exists(received_block_request)
             already_signed = False
             transaction_is_ready_to_mint = False
             issuer_signature = 0
-            if existing_block is None:
+            if block_index is None:
                 if transaction_type == terminology.DID_publication_request:
 
                     all_signatures_are_correct, self_signed, signed_by_all = self.check_signatures(transaction_data,
@@ -262,35 +269,35 @@ class Blockchain:
     #                             break
     #     return block_to_return, DID_index, schema_index, revoke_index
 
-    def DID_block_exists(self, DID_identifier):
-        block_to_return = None
-        DID_index = None
-        for i in range(len(self.chain)):
-            if self.chain[i]['Body'][terminology.transaction][terminology.identifier] == DID_identifier:
-                DID_index = i
-                block_to_return = self.chain[i]
-                break
-        return block_to_return, DID_index
+    # def DID_block_exists(self, DID_identifier):
+    #     block_to_return = None
+    #     DID_index = None
+    #     for i in range(len(self.chain)):
+    #         if self.chain[i]['Body'][terminology.transaction][terminology.identifier] == DID_identifier:
+    #             DID_index = i
+    #             block_to_return = self.chain[i]
+    #             break
+    #     return block_to_return, DID_index
 
-    def schema_block_exists(self, DID_index, schema_identifier):
-        block_to_return = None
-        schema_index = None
-        for s in range(len(self.chain[DID_index]['schemes_chain'])):
-            if self.chain[DID_index]['schemes_chain'][s]['Body'][terminology.transaction][terminology.identifier] == schema_identifier:
-                schema_index = s
-                block_to_return = self.chain[DID_index]['schemes_chain'][s]
-                break
-        return block_to_return, schema_index
+    # def schema_block_exists(self, DID_index, schema_identifier):
+    #     block_to_return = None
+    #     schema_index = None
+    #     for s in range(len(self.chain[DID_index]['schemes_chain'])):
+    #         if self.chain[DID_index]['schemes_chain'][s]['Body'][terminology.transaction][terminology.identifier] == schema_identifier:
+    #             schema_index = s
+    #             block_to_return = self.chain[DID_index]['schemes_chain'][s]
+    #             break
+    #     return block_to_return, schema_index
 
-    def revoke_block_exists(self, DID_index, schema_index, revoke_identifier):
-        block_to_return = None
-        revoke_index = None
-        for v in range(len(self.chain[DID_index]['schemes_chain'][schema_index]['Hashes_of_revoked_credentials'])):
-            if self.chain[DID_index]['schemes_chain'][schema_index]['Hashes_of_revoked_credentials'][v]['Body'][terminology.transaction][terminology.identifier] == revoke_identifier:
-                revoke_index = v
-                block_to_return = self.chain[DID_index]['schemes_chain'][schema_index]['Hashes_of_revoked_credentials'][v]
-                break
-        return block_to_return, revoke_index
+    # def revoke_block_exists(self, DID_index, schema_index, revoke_identifier):
+    #     block_to_return = None
+    #     revoke_index = None
+    #     for v in range(len(self.chain[DID_index]['schemes_chain'][schema_index]['Hashes_of_revoked_credentials'])):
+    #         if self.chain[DID_index]['schemes_chain'][schema_index]['Hashes_of_revoked_credentials'][v]['Body'][terminology.transaction][terminology.identifier] == revoke_identifier:
+    #             revoke_index = v
+    #             block_to_return = self.chain[DID_index]['schemes_chain'][schema_index]['Hashes_of_revoked_credentials'][v]
+    #             break
+    #     return block_to_return, revoke_index
 
     # def credential_is_revoked(self, did_index, schema_index, revoke_identifier):
     #     block_to_return = None
@@ -309,11 +316,13 @@ class Blockchain:
             previous_signature = self.chain[-1]['Header'][terminology.signature]
             identifier = transaction[terminology.identifier]
             index = self.chain[-1]['Header'][terminology.index] + 1
+            bisect_test.add_to_sorted_DID_list(identifier, index)
         else:
             if block_type == terminology.schema_block:
                 previous_signature = self.chain[DID_index]['schemes_chain'][-1]['Header'][terminology.signature]
                 identifier = new_encryption_module.hashing_function(transaction)
                 index = self.chain[DID_index]['schemes_chain'][-1]['Header'][terminology.index] + 1
+                bisect_test.add_to_sorted_schemes_list(identifier, index)
             else:
                 previous_signature = \
                     self.chain[DID_index]['schemes_chain'][schema_index]['Hashes_of_revoked_credentials'][-1]['Header'][
@@ -322,6 +331,7 @@ class Blockchain:
                 index = \
                     self.chain[DID_index]['schemes_chain'][schema_index]['Hashes_of_revoked_credentials'][-1]['Header'][
                         terminology.index] + 1
+                bisect_test.add_to_sorted_revoke_list(identifier, index)
 
         new_block = msg_constructor.construct_new_block(block_type, transaction, self.ip_address, index,
                                                         issuer_signature, previous_signature)
