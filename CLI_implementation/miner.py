@@ -11,7 +11,6 @@ import blockchain
 import terminology
 import consensus
 import pickle
-import bisect_test
 
 
 class Miner:
@@ -90,7 +89,7 @@ class Miner:
                 DID_identifier, schema_identifier, revoke_identifier = blockchain.get_identifiers(
                     received_block['Body'][terminology.transaction], received_block['Header'][terminology.the_type])
                 if received_block['Header'][terminology.the_type] == terminology.DID_block:
-                    DID_index = bisect_test.get_index(bisect_test.sorted_DIDs, DID_identifier)
+                    DID_index = self.my_blockchain.sorted_chain.get_index(1, DID_identifier)
                     # existing_block, DID_index = self.my_blockchain.DID_block_exists(DID_identifier)
                     if DID_index != received_block['Header'][terminology.index]:
                         if self.previous_signature_is_correct(received_block['Header'][terminology.the_type],
@@ -103,7 +102,7 @@ class Miner:
                             blockchain.send_request_to_active_neighbors(request_under_processing, self.neighbors)
                             self.put_blockchain_on_secondary_memory()
                 elif received_block['Header'][terminology.the_type] == terminology.schema_block:
-                    schema_index = bisect_test.get_index(bisect_test.sorted_schemes, schema_identifier)
+                    schema_index = self.my_blockchain.sorted_chain.get_index(2, schema_identifier)
                     # existing_block, schema_index = self.my_blockchain.schema_block_exists(received_block['Body'][terminology.transaction][terminology.DID_index], schema_identifier)
                     if schema_index is not None and schema_index == received_block['Header'][terminology.index]:
                         pass
@@ -118,7 +117,7 @@ class Miner:
                             blockchain.send_request_to_active_neighbors(request_under_processing, self.neighbors)
                             self.put_blockchain_on_secondary_memory()
                 elif received_block['Header'][terminology.the_type] == terminology.schema_block:
-                    revoke_index = bisect_test.get_index(bisect_test.sorted_revoked_cres, revoke_identifier)
+                    revoke_index = self.my_blockchain.sorted_chain.get_index(3, revoke_identifier)
                     # existing_block, revoke_index = self.my_blockchain.revoke_block_exists(received_block['Body'][terminology.transaction][terminology.DID_index], received_block['Body'][terminology.transaction][terminology.schema_index], revoke_identifier)
                     if revoke_index is not None and revoke_index == received_block['Header'][terminology.index]:
                         pass
@@ -243,7 +242,7 @@ class Miner:
         did_index = body_of_request[terminology.DID_index]
         schema_index = body_of_request[terminology.schema_index]
         # schema_block, DID_index, schema_index, revoke_index = self.my_blockchain.already_registered(terminology.schema_block, body_of_request[terminology.did_identifier], body_of_request[terminology.schema_identifier], new_encryption_module.hashing_function(body_of_request))
-        revoke_index = bisect_test.get_index(bisect_test.sorted_revoked_cres, new_encryption_module.hashing_function(body_of_request))
+        revoke_index = self.my_blockchain.sorted_chain.get_index(3, new_encryption_module.hashing_function(body_of_request))
         # revoke_block, revoke_index = self.my_blockchain.revoke_block_exists(did_index, schema_index, hash_of_credential)
         if revoke_index is None:
             accredited_in = self.my_blockchain.chain[did_index]['Body'][terminology.transaction]['Accredited By']
