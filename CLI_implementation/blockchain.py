@@ -322,45 +322,47 @@ class Blockchain:
         if block_type == terminology.DID_block:
             previous_signature = self.chain[-1]['Header'][terminology.signature]
             identifier = transaction[terminology.identifier]
-            index = self.chain[-1]['Header'][terminology.index] + 1
-            bisect_test.add_to_sorted_DID_list(self.sorted_chain, identifier, DID_index)
+            new_index = self.chain[-1]['Header'][terminology.index] + 1
+
             # self.sorted_chain.add_to_sorted_DID_list(identifier, index)
         else:
             if block_type == terminology.schema_block:
                 previous_signature = self.chain[DID_index]['schemes_chain'][-1]['Header'][terminology.signature]
                 identifier = new_encryption_module.hashing_function(transaction)
-                index = self.chain[DID_index]['schemes_chain'][-1]['Header'][terminology.index] + 1
-                bisect_test.add_to_sorted_schemes_list(self.sorted_chain, identifier, index)
+                new_index = self.chain[DID_index]['schemes_chain'][-1]['Header'][terminology.index] + 1
+
             else:
                 previous_signature = \
                     self.chain[DID_index]['schemes_chain'][schema_index]['Hashes_of_revoked_credentials'][-1]['Header'][
                         terminology.signature]
                 identifier = transaction[terminology.identifier]
-                index = \
+                new_index = \
                     self.chain[DID_index]['schemes_chain'][schema_index]['Hashes_of_revoked_credentials'][-1]['Header'][
                         terminology.index] + 1
-                bisect_test.add_to_sorted_revoke_list(self.sorted_chain, identifier, index)
 
-        new_block = msg_constructor.construct_new_block(block_type, transaction, self.ip_address, index,
+        new_block = msg_constructor.construct_new_block(block_type, transaction, self.ip_address, new_index,
                                                         issuer_signature, previous_signature)
         proof = consensus.generate_proof_of_authority(new_block)
         new_block['Header'][terminology.signature] = proof
         output.present_dictionary(new_block)
-        self.add_block_to_local_chain(new_block, block_type, DID_index, schema_index)
-        self.send_block_confirmation_msg(block_type, identifier, gateway_address, index)
+        self.add_block_to_local_chain(new_block, block_type, DID_index, schema_index, identifier, new_index)
+        self.send_block_confirmation_msg(block_type, identifier, gateway_address, new_index)
         push_to_miners = msg_constructor.construct_internal_request(terminology.block, self.ip_address, new_block)
         for neighbor in neighbors:
             client.send(push_to_miners, neighbor)
 
-    def add_block_to_local_chain(self, new_block, block_type, DID_index, schema_index):
+    def add_block_to_local_chain(self, new_block, block_type, DID_index, schema_index, identifier, new_index):
         if block_type == terminology.DID_block:
             self.chain.append(new_block)
             removed_pending_block_request = self.pending_blocks.pop(
                 new_block['Body'][terminology.transaction][terminology.identifier])
+            bisect_test.add_to_sorted_DID_list(self.sorted_chain, identifier, new_index)
         if block_type == terminology.schema_block:
             self.chain[DID_index]['schemes_chain'].append(new_block)
+            bisect_test.add_to_sorted_schemes_list(self.sorted_chain, identifier, new_index)
         if block_type == terminology.revoke_block:
             self.chain[DID_index]['schemes_chain'][schema_index]['Hashes_of_revoked_credentials'].append(new_block)
+            bisect_test.add_to_sorted_revoke_list(self.sorted_chain, identifier, new_index)
 
     def save_modified_blockchain(self, version=None):
         if version:

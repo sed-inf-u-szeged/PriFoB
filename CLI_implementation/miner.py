@@ -98,7 +98,7 @@ class Miner:
                                                               DID_index, None):
                             self.my_blockchain.add_block_to_local_chain(received_block,
                                                                         received_block['Header'][terminology.the_type],
-                                                                        DID_index, None)
+                                                                        DID_index, None, DID_identifier, received_block['Header'][terminology.index])
                             print('new valid block is received..!')
                             blockchain.send_request_to_active_neighbors(request_under_processing, self.neighbors)
                             self.put_blockchain_on_secondary_memory()
@@ -113,7 +113,7 @@ class Miner:
                                                               received_block['Body'][terminology.transaction][terminology.DID_index], schema_index):
                             self.my_blockchain.add_block_to_local_chain(received_block,
                                                                         received_block['Header'][terminology.the_type],
-                                                                        received_block['Body'][terminology.transaction][terminology.DID_index], schema_index)
+                                                                        received_block['Body'][terminology.transaction][terminology.DID_index], schema_index, schema_identifier, received_block['Header'][terminology.index])
                             print('new valid block is received..!')
                             blockchain.send_request_to_active_neighbors(request_under_processing, self.neighbors)
                             self.put_blockchain_on_secondary_memory()
@@ -132,7 +132,7 @@ class Miner:
                                                                         received_block['Header'][terminology.the_type],
                                                                         received_block['Body'][terminology.transaction][
                                                                             terminology.DID_index], received_block['Body'][terminology.transaction][
-                                                                            terminology.DID_index])
+                                                                            terminology.DID_index], revoke_identifier, received_block['Header'][terminology.index])
                             print('new valid block is received..!')
                             blockchain.send_request_to_active_neighbors(request_under_processing, self.neighbors)
                             self.put_blockchain_on_secondary_memory()
