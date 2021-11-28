@@ -72,6 +72,7 @@ class Blockchain:
         try:
             revoke_index = None
             schema_index = None
+            DID_index = None
             transaction_data = received_block_request[terminology.transaction]
             transaction_type = received_block_request[terminology.the_type]
             DID_identifier, schema_identifier, revoke_identifier = get_identifiers(transaction_data, transaction_type)
@@ -82,22 +83,23 @@ class Blockchain:
                 if block_index:
                     existing_block = self.chain[DID_index]['schemes_chain'][block_index]
                 # existing_block, schema_index = self.schema_block_exists(DID_index, schema_identifier)
-            elif transaction_type == terminology.revoke_request:
-                block_type = terminology.revoke_block
-                DID_index = transaction_data[terminology.DID_index]
-                schema_index = transaction_data[terminology.schema_index]
-                block_index = self.sorted_chain.get_index(3, revoke_identifier)
-                if block_index:
-                    existing_block = self.chain[DID_index]['schemes_chain'][schema_index]['Hashes_of_revoked_credentials'][block_index]
-                # existing_block, revoke_index = self.revoke_block_exists(DID_index, schema_index, revoke_identifier)
             else:
-                block_type = terminology.DID_block
-                block_index = bisect_test.SortedBlocks.get_index(self.sorted_chain, 1, DID_identifier)
-                # block_index = self.sorted_chain.get_index(1, DID_identifier)
-                if block_index is not None:
-                    existing_block = self.chain[block_index]
-                # existing_block, DID_index = self.DID_block_exists(DID_identifier)
-                # existing_block, DID_index, schema_index, revoke_index = self.check_if_block_exists(received_block_request)
+                if transaction_type == terminology.revoke_request:
+                    block_type = terminology.revoke_block
+                    DID_index = transaction_data[terminology.DID_index]
+                    schema_index = transaction_data[terminology.schema_index]
+                    block_index = self.sorted_chain.get_index(3, revoke_identifier)
+                    if block_index:
+                        existing_block = self.chain[DID_index]['schemes_chain'][schema_index]['Hashes_of_revoked_credentials'][block_index]
+                    # existing_block, revoke_index = self.revoke_block_exists(DID_index, schema_index, revoke_identifier)
+                else:
+                    block_type = terminology.DID_block
+                    block_index = bisect_test.SortedBlocks.get_index(self.sorted_chain, 1, DID_identifier)
+                    # block_index = self.sorted_chain.get_index(1, DID_identifier)
+                    if block_index is not None:
+                        existing_block = self.chain[block_index]
+                    # existing_block, DID_index = self.DID_block_exists(DID_identifier)
+                    # existing_block, DID_index, schema_index, revoke_index = self.check_if_block_exists(received_block_request)
             already_signed = False
             transaction_is_ready_to_mint = False
             issuer_signature = 0
