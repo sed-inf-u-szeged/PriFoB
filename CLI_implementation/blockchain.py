@@ -323,7 +323,8 @@ class Blockchain:
             previous_signature = self.chain[-1]['Header'][terminology.signature]
             identifier = transaction[terminology.identifier]
             index = self.chain[-1]['Header'][terminology.index] + 1
-            self.sorted_chain.add_to_sorted_DID_list(identifier, index)
+            bisect_test.SortedBlocks.add_to_sorted_DID_list(self.sorted_chain, identifier, DID_index)
+            # self.sorted_chain.add_to_sorted_DID_list(identifier, index)
         else:
             if block_type == terminology.schema_block:
                 previous_signature = self.chain[DID_index]['schemes_chain'][-1]['Header'][terminology.signature]
