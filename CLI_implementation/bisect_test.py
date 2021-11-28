@@ -17,6 +17,7 @@ class SortedBlocks:
         bisect.insort(self.sorted_revoked_cres, (revoke_identifier, revoke_index))
 
     def get_index(self, list_level, target):
+        print('here')
         if list_level in [1, 2, 3]:
             if list_level == 1:
                 the_list = self.sorted_DIDs

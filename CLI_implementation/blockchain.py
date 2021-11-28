@@ -79,14 +79,16 @@ class Blockchain:
                 block_type = terminology.schema_block
                 DID_index = transaction_data[terminology.DID_index]
                 block_index = self.sorted_chain.get_index(2, schema_identifier)
-                existing_block = self.chain[DID_index]['schemes_chain'][block_index]
+                if block_index:
+                    existing_block = self.chain[DID_index]['schemes_chain'][block_index]
                 # existing_block, schema_index = self.schema_block_exists(DID_index, schema_identifier)
             elif transaction_type == terminology.revoke_request:
                 block_type = terminology.revoke_block
                 DID_index = transaction_data[terminology.DID_index]
                 schema_index = transaction_data[terminology.schema_index]
                 block_index = self.sorted_chain.get_index(3, revoke_identifier)
-                existing_block = self.chain[DID_index]['schemes_chain'][schema_index]['Hashes_of_revoked_credentials'][block_index]
+                if block_index:
+                    existing_block = self.chain[DID_index]['schemes_chain'][schema_index]['Hashes_of_revoked_credentials'][block_index]
                 # existing_block, revoke_index = self.revoke_block_exists(DID_index, schema_index, revoke_identifier)
             else:
                 block_type = terminology.DID_block
