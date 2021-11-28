@@ -11,8 +11,7 @@ import blockchain
 import terminology
 import consensus
 import pickle
-
-from CLI_implementation import bisect_test
+import bisect_test
 
 
 class Miner:
