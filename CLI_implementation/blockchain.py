@@ -91,7 +91,8 @@ class Blockchain:
             else:
                 block_type = terminology.DID_block
                 block_index = self.sorted_chain.get_index(1, DID_identifier)
-                existing_block = self.chain[block_index]
+                if block_index:
+                    existing_block = self.chain[block_index]
                 # existing_block, DID_index = self.DID_block_exists(DID_identifier)
                 # existing_block, DID_index, schema_index, revoke_index = self.check_if_block_exists(received_block_request)
             already_signed = False
