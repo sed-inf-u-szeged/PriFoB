@@ -79,7 +79,7 @@ class Blockchain:
             if transaction_type == terminology.schema_publication_request:
                 block_type = terminology.schema_block
                 DID_index = transaction_data[terminology.DID_index]
-                block_index = self.sorted_chain.get_index(2, schema_identifier)
+                block_index = bisect_test.get_index(self.sorted_chain, 2, schema_identifier)
                 if block_index:
                     existing_block = self.chain[DID_index]['schemes_chain'][block_index]
                 # existing_block, schema_index = self.schema_block_exists(DID_index, schema_identifier)
@@ -88,13 +88,13 @@ class Blockchain:
                     block_type = terminology.revoke_block
                     DID_index = transaction_data[terminology.DID_index]
                     schema_index = transaction_data[terminology.schema_index]
-                    block_index = self.sorted_chain.get_index(3, revoke_identifier)
+                    block_index = bisect_test.get_index(self.sorted_chain, 3, revoke_identifier)
                     if block_index:
                         existing_block = self.chain[DID_index]['schemes_chain'][schema_index]['Hashes_of_revoked_credentials'][block_index]
                     # existing_block, revoke_index = self.revoke_block_exists(DID_index, schema_index, revoke_identifier)
                 else:
                     block_type = terminology.DID_block
-                    block_index = bisect_test.SortedBlocks.get_index(self.sorted_chain, 1, DID_identifier)
+                    block_index = bisect_test.get_index(self.sorted_chain, 1, DID_identifier)
                     # block_index = self.sorted_chain.get_index(1, DID_identifier)
                     if block_index is not None:
                         existing_block = self.chain[block_index]
@@ -323,14 +323,14 @@ class Blockchain:
             previous_signature = self.chain[-1]['Header'][terminology.signature]
             identifier = transaction[terminology.identifier]
             index = self.chain[-1]['Header'][terminology.index] + 1
-            bisect_test.SortedBlocks.add_to_sorted_DID_list(self.sorted_chain, identifier, DID_index)
+            bisect_test.add_to_sorted_DID_list(self.sorted_chain, identifier, DID_index)
             # self.sorted_chain.add_to_sorted_DID_list(identifier, index)
         else:
             if block_type == terminology.schema_block:
                 previous_signature = self.chain[DID_index]['schemes_chain'][-1]['Header'][terminology.signature]
                 identifier = new_encryption_module.hashing_function(transaction)
                 index = self.chain[DID_index]['schemes_chain'][-1]['Header'][terminology.index] + 1
-                self.sorted_chain.add_to_sorted_schemes_list(identifier, index)
+                bisect_test.add_to_sorted_schemes_list(self.sorted_chain, identifier, index)
             else:
                 previous_signature = \
                     self.chain[DID_index]['schemes_chain'][schema_index]['Hashes_of_revoked_credentials'][-1]['Header'][
@@ -339,7 +339,7 @@ class Blockchain:
                 index = \
                     self.chain[DID_index]['schemes_chain'][schema_index]['Hashes_of_revoked_credentials'][-1]['Header'][
                         terminology.index] + 1
-                self.sorted_chain.add_to_sorted_revoke_list(identifier, index)
+                bisect_test.add_to_sorted_revoke_list(self.sorted_chain, identifier, index)
 
         new_block = msg_constructor.construct_new_block(block_type, transaction, self.ip_address, index,
                                                         issuer_signature, previous_signature)
