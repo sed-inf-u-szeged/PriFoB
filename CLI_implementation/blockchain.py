@@ -101,6 +101,7 @@ class Blockchain:
             transaction_is_ready_to_mint = False
             issuer_signature = 0
             if block_index is None:
+                print('here')
                 if transaction_type == terminology.DID_publication_request:
 
                     all_signatures_are_correct, self_signed, signed_by_all = self.check_signatures(transaction_data,
