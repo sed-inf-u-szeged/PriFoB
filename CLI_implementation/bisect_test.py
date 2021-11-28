@@ -24,20 +24,23 @@ class SortedBlocks:
                 the_list = self.sorted_schemes
             else:
                 the_list = self.sorted_revoked_cres
-            fst, snd = zip(*the_list)
-            if type(target) is str:
-                index = bisect.bisect(fst, target) - 1
-                new_target = target
-                # index = bisect.bisect(the_list, target)
-            else:
-                index = bisect.bisect(fst, target[1]) - 1
-                new_target = target[1]
-                # index = bisect.bisect(the_list, target[1])
-            if index < len(the_list) and new_target == fst[index]:
-                return snd[index]
-                # print(str(new_target) + ' EXISTS with index = ' + str(snd[index]))
-                # return True
+            if the_list:
+                fst, snd = zip(*the_list)
+                if type(target) is str:
+                    index = bisect.bisect(fst, target) - 1
+                    new_target = target
+                    # index = bisect.bisect(the_list, target)
+                else:
+                    index = bisect.bisect(fst, target[1]) - 1
+                    new_target = target[1]
+                    # index = bisect.bisect(the_list, target[1])
+                if index < len(the_list) and new_target == fst[index]:
+                    return snd[index]
+                    # print(str(new_target) + ' EXISTS with index = ' + str(snd[index]))
+                    # return True
+                else:
+                    return None
+                    # print(new_target + ' DOES NOT EXIST')
+                    # return False
             else:
                 return None
-                # print(new_target + ' DOES NOT EXIST')
-                # return False
