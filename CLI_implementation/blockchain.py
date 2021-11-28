@@ -93,15 +93,15 @@ class Blockchain:
             else:
                 block_type = terminology.DID_block
                 block_index = self.sorted_chain.get_index(1, DID_identifier)
-                if block_index:
+                if block_index is not None:
                     existing_block = self.chain[block_index]
                 # existing_block, DID_index = self.DID_block_exists(DID_identifier)
                 # existing_block, DID_index, schema_index, revoke_index = self.check_if_block_exists(received_block_request)
             already_signed = False
+            print('here')
             transaction_is_ready_to_mint = False
             issuer_signature = 0
             if block_index is None:
-                print('here')
                 if transaction_type == terminology.DID_publication_request:
 
                     all_signatures_are_correct, self_signed, signed_by_all = self.check_signatures(transaction_data,
