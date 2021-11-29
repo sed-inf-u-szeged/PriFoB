@@ -194,8 +194,7 @@ def send_test_revoke_requests():
             schema_index = credential[terminology.credential][terminology.schema_index]
             hash_of_signed_credential = new_encryption_module.hashing_function(
                 credential[terminology.credential])
-            signature = shared_functions.retrieve_signature_from_saved_key(credential[terminology.credential],
-                                                                           schema_identifier)
+            signature = shared_functions.retrieve_signature_from_saved_key(credential[terminology.credential], 'test_DID_key')
             revoke_data = msg_constructor.revoke_block_data(credential[terminology.credential][terminology.did_identifier], my_address.provide_my_address(), schema_identifier,
                                                             hash_of_signed_credential, DID_index, schema_index)
             revoke_request = msg_constructor.construct_new_block_request(terminology.revoke_request, revoke_data,
@@ -233,7 +232,7 @@ def send_test_revoke_requests():
         print('Average seconds per validation request = ' + str(
             total_revoke_response_time / len(revoke_response_times)))
 
-        
+
 def start_testing():
     try:
         send_test_DIDs()
