@@ -72,16 +72,19 @@ def send_test_schemes():
     deserialized_public_key = new_encryption_module.deserialize_key(my_public_key)
     requests = []
     for i in range(number_of_schemes):
-        DID_record = random.choice(DIDs_requests_list)
-        DID_identifier = DID_record[0][terminology.transaction][terminology.identifier]
-        new_schema_attributes = [[random.random(), 'Mandatory'], [random.random(), 'Not Mandatory']]
-        schema_data = msg_constructor.schema_block_data(DID_identifier, my_address.provide_my_address(),str(i), deserialized_public_key, new_schema_attributes)
-        schema_data[terminology.DID_index] = DID_record[0][terminology.transaction][terminology.DID_index]
-        signature = shared_functions.retrieve_signature_from_saved_key(schema_data[terminology.identifier], 'test_DID_key')
-        request = msg_constructor.construct_new_block_request(terminology.schema_publication_request, schema_data, signature)
-        requests.append(request)
-        schemes_requests_list.append(
-            [new_encryption_module.hashing_function(request[terminology.transaction]), time.time(), request])
+        try:
+            DID_record = random.choice(DIDs_requests_list)
+            DID_identifier = DID_record[0][terminology.transaction][terminology.identifier]
+            new_schema_attributes = [[random.random(), 'Mandatory'], [random.random(), 'Not Mandatory']]
+            schema_data = msg_constructor.schema_block_data(DID_identifier, my_address.provide_my_address(),str(i), deserialized_public_key, new_schema_attributes)
+            schema_data[terminology.DID_index] = DID_record[0][terminology.transaction][terminology.DID_index]
+            signature = shared_functions.retrieve_signature_from_saved_key(schema_data[terminology.identifier], 'test_DID_key')
+            request = msg_constructor.construct_new_block_request(terminology.schema_publication_request, schema_data, signature)
+            requests.append(request)
+            schemes_requests_list.append(
+                [new_encryption_module.hashing_function(request[terminology.transaction]), time.time(), request])
+        except Exception as e:
+            print(e)
     for i in range(len(requests)):
         client.send(requests[i], BC_address)
         # time.sleep(response_wait_time/number_of_schemes)
