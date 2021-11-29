@@ -215,7 +215,7 @@ def send_test_revoke_requests():
             if message[terminology.the_type] == 'block_confirmation' and message['block_type'] == terminology.revoke_block:
                 number_of_responses += 1
                 for revoke_request in pending_revoke_requests:
-                    if revoke_request[0] == message[terminology.credential]['Hash_of_credential']:
+                    if revoke_request[0] == message['block_identifier']:
                         elapsed_time = receiving_time - revoke_request[1]
                         revoke_response_times.append(elapsed_time)
                         break
