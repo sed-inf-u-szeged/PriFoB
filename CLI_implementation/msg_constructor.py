@@ -85,7 +85,7 @@ def construct_block_confirmation_message(is_added, block_type, miner_ip, block_i
 def schema_block_data(inst_name, address, schema_label, public_key, attributes):
     data = {'institution_name': inst_name,
             'institution_address': address,
-            terminology.identifier: schema_label,
+            terminology.identifier: str(schema_label),
             'schema_public_key': public_key,
             'schema_attributes': attributes}
     return data
