@@ -38,7 +38,7 @@ def handle_client(connection, address):
                 content = connection.recv(int_content_length).decode(FORMAT)
                 if content:
                     connection.close()
-                    received_dictionary = json.loads(content)
+                    received_dictionary = json.load(content)
                     memory_pool.received_msgs.put([received_dictionary, address, time.time()])
     except Exception as e:
         print(e)

@@ -190,7 +190,6 @@ class Miner:
         client.send(response, requester_address)
 
     def update_my_BC(self, request_under_processing, sender_address):
-        print(request_under_processing)
         if sender_address == self.longer_chain_at:
             self.my_blockchain.chain.clear()
             self.my_blockchain.chain = request_under_processing['Public_blockchain']
