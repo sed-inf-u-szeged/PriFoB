@@ -98,7 +98,7 @@ def deserialize_signature(serialized_signature):
 
 
 def serialize_key(old_key, public_or_private):
-    bytes_key = old_key.encode('latin-1')
+    bytes_key = old_key.encode('UTF-8')
     if public_or_private == terminology.public:
         return rsa.key.PublicKey.load_pkcs1(bytes_key, format='PEM')
     if public_or_private == terminology.private:
@@ -107,7 +107,7 @@ def serialize_key(old_key, public_or_private):
 
 def deserialize_key(serialized_key):
     bytes_key = serialized_key.save_pkcs1('PEM')
-    return bytes_key.decode('latin-1')
+    return bytes_key.decode('UTF-8')
 
 
 def hashing_function(entity):

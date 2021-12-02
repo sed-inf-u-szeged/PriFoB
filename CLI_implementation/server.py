@@ -43,8 +43,7 @@ def handle_client(connection, address):
                     decoded_content = content.decode(FORMAT)
                     # print(content)
                     connection.close()
-                    fixed_dictionary = fix_text(decoded_content)
-                    received_dictionary = json.loads(fixed_dictionary)
+                    received_dictionary = json.loads(decoded_content)
                     memory_pool.received_msgs.put([received_dictionary, address, time.time()])
                 else:
                     print('message was not received fully')
