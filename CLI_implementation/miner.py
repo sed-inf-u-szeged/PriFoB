@@ -230,7 +230,7 @@ class Miner:
             if len(self.neighbors) < self.max_num_neighbors and miner[1] not in self.neighbors and miner[1] != self.ip_address:
                 self.neighbors.append(miner[1])
         self.miners = up_to_date_miners_info
-        self.authorized_miner = request_under_processing['Authorized_miner']
+        # self.authorized_miner = request_under_processing['Authorized_miner']
 
     def request_to_be_miner(self):
         my_public_key = new_encryption_module.prepare_key_for_use(terminology.public, 'my_key')
