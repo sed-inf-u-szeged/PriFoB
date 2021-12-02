@@ -188,6 +188,7 @@ class Miner:
         if requester_address == self.BC_address:
             response['agent_address'] = request_under_processing['body']['requester_address']
         client.send(response, requester_address)
+        print(response)
 
     def update_my_BC(self, request_under_processing, sender_address):
         if sender_address == self.longer_chain_at:
@@ -195,6 +196,7 @@ class Miner:
             self.my_blockchain.chain = request_under_processing['Public_blockchain']
             print('Local DL has been synchronized.')
             self.put_blockchain_on_secondary_memory()
+            print(request_under_processing)
 
     def put_blockchain_on_secondary_memory(self):
         if self.my_blockchain.data_placement == '2':

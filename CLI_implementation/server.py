@@ -37,9 +37,12 @@ def handle_client(connection, address):
                 int_content_length = int(string_content_length)
                 content = connection.recv(int_content_length).decode(FORMAT)
                 if content:
+                    print(content)
                     connection.close()
                     received_dictionary = json.loads(content)
                     memory_pool.received_msgs.put([received_dictionary, address, time.time()])
+                else:
+                    print('message was not received fully')
     except Exception as e:
         print(e)
 
