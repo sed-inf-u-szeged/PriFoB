@@ -80,7 +80,7 @@ def send_test_schemes():
             DID_record = random.choice(DIDs_requests_list)
             DID_identifier = DID_record[0][terminology.transaction][terminology.identifier]
             new_schema_attributes = [[random.random(), 'Mandatory'], [random.random(), 'Not Mandatory']]
-            schema_data = msg_constructor.schema_block_data(DID_identifier, my_address.provide_my_address(),str(i), deserialized_public_key, new_schema_attributes)
+            schema_data = msg_constructor.schema_block_data(DID_identifier, my_address.provide_my_address(), str(i), deserialized_public_key, new_schema_attributes)
             schema_data[terminology.DID_index] = DID_record[0][terminology.transaction][terminology.DID_index]
             signature = shared_functions.retrieve_signature_from_saved_key(schema_data[terminology.identifier], 'test_DID_key')
             request = msg_constructor.construct_new_block_request(terminology.schema_publication_request, schema_data, signature)
@@ -122,7 +122,7 @@ def send_test_schemes():
 
 
 def generate_test_credentials():
-    for i in range(len(schemes_requests_list)):
+    for i in range(number_of_credentials):
         try:
             schema_record = random.choice(schemes_requests_list)
             schema_label = str(random.randint(0, number_of_schemes))
@@ -142,7 +142,7 @@ def generate_test_credentials():
                                  terminology.signature: signature}
             credentials_list.append(signed_credential)
         except Exception as e:
-            print(e)
+            i -= 1
     print('All credentials have been issued.')
 
 

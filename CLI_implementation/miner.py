@@ -179,6 +179,7 @@ class Miner:
                 or request_under_processing['D3'] > number_of_revoked_credentials:
             request = {terminology.the_type: 'download_BC'}
             client.send(request, requester_address)
+            print('found a longer chain at: ' + requester_address)
             self.longer_chain_at = requester_address
 
     def provide_full_BC(self, request_under_processing, requester_address):
@@ -189,6 +190,7 @@ class Miner:
         client.send(response, requester_address)
 
     def update_my_BC(self, request_under_processing, sender_address):
+        print(request_under_processing)
         if sender_address == self.longer_chain_at:
             self.my_blockchain.chain.clear()
             self.my_blockchain.chain = request_under_processing['Public_blockchain']
