@@ -3,7 +3,6 @@ import time
 import memory_pool
 import json
 import my_address
-from ftfy import fix_text
 
 header = 512
 PORT = 5050
