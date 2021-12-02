@@ -413,5 +413,7 @@ class Blockchain:
             'Accredited': accredited,
             terminology.signature: signature,
             'Admin': person_who_signed_this}
-        self.handle_new_block_request(new_handled_request, miners, BC_address, neighbors, self.ip_address,
-                                      miner_location, authorized_miner)
+        # self.handle_new_block_request(new_handled_request, miners, BC_address, neighbors, self.ip_address,
+        #                               miner_location, authorized_miner)
+        random_neighbor = random.choice(neighbors)
+        client.send(new_handled_request, random_neighbor)

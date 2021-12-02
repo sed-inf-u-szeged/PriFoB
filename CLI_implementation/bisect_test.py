@@ -30,6 +30,10 @@ def get_index(sorted_chain, list_level, target):
             the_list = sorted_chain.sorted_revoked_cres
         if the_list:
             fst, snd = zip(*the_list)
+            # here, a for loop needs to be implemented where it iterates from the end of the sorted list towards the genises block
+            # if the following condition applies, the for loop shall break and the snd[index] is returned. Otherwise, the for loop continues
+            # this should allow for DAG based adoption without the "longest chain" rule to be applied. To this end, a tie appearing in the index of several blocks
+            # does not imply a security problem
             index = bisect.bisect(fst, target) - 1
             if index < len(the_list) and target == fst[index]:
                 return snd[index]
