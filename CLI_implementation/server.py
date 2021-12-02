@@ -32,9 +32,11 @@ def handle_client(connection, address):
         string_header_length = connection.recv(header).decode(FORMAT)
         if string_header_length:
             int_header_length = int(string_header_length)
+            print(int_header_length)
             string_content_length = connection.recv(int_header_length).decode(FORMAT)
             if string_content_length:
                 int_content_length = int(string_content_length)
+                print(int_content_length)
                 content = connection.recv(int_content_length).decode(FORMAT)
                 if content:
                     print(content)
