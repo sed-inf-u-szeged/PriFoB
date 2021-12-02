@@ -40,7 +40,7 @@ def handle_client(connection, address):
                 # print(int_content_length)
                 content = connection.recv(int_content_length)
                 if content:
-                    decoded_content = content.decode(FORMAT)
+                    decoded_content = content.decode(FORMAT, errors='ignore')
                     # print(content)
                     connection.close()
                     received_dictionary = json.loads(decoded_content)

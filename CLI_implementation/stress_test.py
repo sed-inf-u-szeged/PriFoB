@@ -229,7 +229,7 @@ def send_test_revoke_requests():
     print('Number of received responses: ' + str(len(revoke_response_times)))
     print('Success rate: ' + str(len(revoke_response_times) * 100 / len(pending_revoke_requests)) + '%')
     if len(revoke_response_times) > 0:
-        print('Average seconds per validation request = ' + str(
+        print('Average seconds per revoke request = ' + str(
             total_revoke_response_time / len(revoke_response_times)))
 
 
