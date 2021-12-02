@@ -3,6 +3,7 @@ import time
 import memory_pool
 import json
 import my_address
+from ftfy import fix_text
 
 header = 512
 PORT = 5050
@@ -42,7 +43,8 @@ def handle_client(connection, address):
                     decoded_content = content.decode(FORMAT)
                     # print(content)
                     connection.close()
-                    received_dictionary = json.loads(decoded_content)
+                    fixed_dictionary = fix_text(decoded_content)
+                    received_dictionary = json.loads(fixed_dictionary)
                     memory_pool.received_msgs.put([received_dictionary, address, time.time()])
                 else:
                     print('message was not received fully')
