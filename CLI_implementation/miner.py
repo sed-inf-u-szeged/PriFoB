@@ -188,7 +188,7 @@ class Miner:
         if requester_address == self.BC_address:
             response['agent_address'] = request_under_processing['body']['requester_address']
         client.send(response, requester_address)
-        print(response)
+        # print(response)
 
     def update_my_BC(self, request_under_processing, sender_address):
         if sender_address == self.longer_chain_at:
