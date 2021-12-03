@@ -40,6 +40,7 @@ def handle_client(connection, address):
                 if content:
                     connection.close()
                     received_dictionary = json.loads(content)
+                    print(received_dictionary)
                     memory_pool.received_msgs.put([received_dictionary, address, time.time()])
     except Exception as e:
         print(e)
