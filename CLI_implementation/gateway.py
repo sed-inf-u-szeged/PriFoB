@@ -35,9 +35,7 @@ def handle_requests_in_buffer():
                 continue
             if received_request[terminology.the_type] in terminology.transactions_labels:
                 add_transaction_to_pending_list(received_request, requester_address)
-                print(received_request)
                 miner = select_random_miner()
-                print(miner)
                 client.send(received_request, miner)
                 continue
             if received_request[terminology.the_type] == 'block_confirmation':
