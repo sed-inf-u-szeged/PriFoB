@@ -34,15 +34,15 @@ def get_index(sorted_chain, list_level, target):
             # if the following condition applies, the for loop shall break and the snd[index] is returned. Otherwise, the for loop continues
             # this should allow for DAG based adoption without the "longest chain" rule to be applied. To this end, a tie appearing in the index of several blocks
             # does not imply a security problem
+            value_to_return = None
             for i in range(len(the_list)):
-                index = bisect.bisect(fst, target) - 1
-                if index < len(the_list) and target == fst[index]:
-                    return snd[index]
-                    # print(str(new_target) + ' EXISTS with index = ' + str(snd[index]))
-                    # return True
-                # else:
-                #     return None
-                #     # print(new_target + ' DOES NOT EXIST')
-                #     # return False
+                try:
+                    index = bisect.bisect(fst, target) - 1
+                    if index < len(the_list) and target == fst[index]:
+                        value_to_return = snd[index]
+                        break
+                except Exception as e:
+                    print(e)
+            return value_to_return
         else:
             return None
