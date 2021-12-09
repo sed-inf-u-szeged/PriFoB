@@ -298,7 +298,7 @@ class Miner:
                 if option == '4':
                     output.clear()
                 if option == '5':
-                    self.my_blockchain.chain.clear()
+                    self.my_blockchain = blockchain.Blockchain(self.BC_address, blockchain.automated_signing())
                     self.put_blockchain_on_secondary_memory()
                 if option == '6':
                     os._exit(1)
