@@ -200,7 +200,8 @@ def miner_admin_options(num_of_unconfirmed_DIDs):
     print("2- Review Local Chain statistics")
     print("3- Synchronize Local Chain")
     print("4- Refresh screen")
-    print('5- exit\n')
+    print("5- delete my local BC contents")
+    print('6- exit\n')
 
 
 def present_dictionary(dictionary_to_be_presented):

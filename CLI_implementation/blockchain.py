@@ -418,3 +418,4 @@ class Blockchain:
         #                               miner_location, authorized_miner)
         random_neighbor = random.choice(neighbors)
         client.send(new_handled_request, random_neighbor)
+
