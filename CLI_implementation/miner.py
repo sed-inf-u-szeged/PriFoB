@@ -288,7 +288,7 @@ class Miner:
                 num_of_unconfirmed_DIDs = len(self.my_blockchain.unsigned_DIDs)
                 # self.my_blockchain.resolve_signed_DIDs(self.miners, self.BC_address, self.neighbors, self.location)
                 output.miner_admin_options(num_of_unconfirmed_DIDs)
-                option = shared_functions.input_function(['1', '2', '3', '4', '5'])
+                option = shared_functions.input_function(['1', '2', '3', '4', '5', '6'])
                 if option == '1':
                     self.my_blockchain.process_unsigned_dids(self.location, self.miners, self.BC_address, self.neighbors, self.authorized_miner)
                 if option == '2':
