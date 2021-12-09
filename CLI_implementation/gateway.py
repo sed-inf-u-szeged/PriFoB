@@ -1,3 +1,4 @@
+import copy
 import os
 import time
 import client
@@ -12,12 +13,31 @@ import output
 import terminology
 import data_layer_config
 
+
+class LoadBalancer:
+    def __init__(self):
+        self.list_of_connections = copy.copy(miners)
+        self.next_index = None
+
+    def select_next_miner(self):
+        try:
+            if self.next_index < len(self.list_of_connections):
+                self.next_index += 1
+                if miner_is_active(self.list_of_connections[self.next_index - 1]):
+                    return self.list_of_connections[self.next_index - 1][1]
+            else:
+                self.next_index = 1
+                return self.list_of_connections[0][1]
+        except Exception as e:
+            return None
+
+
 miners = []
 address = my_address.provide_my_address()
 max_num_neighbors_per_miner = 5
 min_num_of_miners = 2
 ping_time = data_layer_config.ping_time
-
+my_load_balancer = LoadBalancer()
 DIDs_under_processing = []
 schemes_under_processing = []
 revoked_credentials_under_processing = []
@@ -35,14 +55,15 @@ def handle_requests_in_buffer():
                 continue
             if received_request[terminology.the_type] in terminology.transactions_labels:
                 add_transaction_to_pending_list(received_request, requester_address)
-                miner = select_random_miner()
+                miner = my_load_balancer.select_next_miner()
+                # miner = select_random_miner()
                 client.send(received_request, miner)
                 continue
             if received_request[terminology.the_type] == 'block_confirmation':
                 handle_confirmation_messages(received_request, requester_address)
                 continue
             if received_request[terminology.the_type] == 'signature_validation':
-                miner_address = select_random_miner()
+                miner_address = my_load_balancer.select_next_miner()
                 internal_request = msg_constructor.construct_internal_request(received_request[terminology.the_type],
                                                                               requester_address, received_request)
                 client.send(internal_request, miner_address)
@@ -56,7 +77,7 @@ def handle_requests_in_buffer():
                 client.send(response, received_request['agent_address'])
                 continue
             if received_request[terminology.the_type] == 'institutions' or received_request[terminology.the_type] == 'download_BC':
-                miner_address = select_random_miner()
+                miner_address = my_load_balancer.select_next_miner()
                 internal_request = msg_constructor.construct_internal_request(received_request[terminology.the_type],
                                                                               requester_address, received_request)
                 client.send(internal_request, miner_address)
@@ -95,18 +116,17 @@ def miner_is_active(miner_record):
         return False
 
 
-def select_random_miner():
-    try:
-        not_found = True
-        random_miner = random.choice(miners)
-        while not_found:
-            random_miner = random.choice(miners)
-            if miner_is_active(random_miner):
-                not_found = False
-        miner_address = random_miner[1]
-        return miner_address
-    except Exception as e:
-        print(e)
+# def select_random_miner():
+#     try:
+#         found = False
+#         selected_miner = None
+#         while not found:
+#             # selected_miner = random.choice(miners)
+#             selected_miner = cycle(miners)
+#             found = miner_is_active(selected_miner)
+#         return selected_miner[1]
+#     except Exception as e:
+#         print(e)
 
 
 # The following function needs to be modified using the DONS approach
@@ -154,6 +174,7 @@ def activate_new_miner(mining_request):
                 for miner in miners:
                     inform_miner_of_active_status(miner, data_on_secondary_memory)
             else:
+                my_load_balancer.next_index = 0
                 print('Number of miners is still not sufficient.'
                       'Miners will be activated when they reach the minimum number.. press any key\n')
                 out = input()
@@ -206,7 +227,7 @@ def ping_miners():
             ping_request = {terminology.the_type: 'ping',
                             'Num_of_miners': num_of_active_miners,
                             'Miners': miners,
-                            'Authorized_miner': select_random_miner()}
+                            'Authorized_miner': my_load_balancer.select_next_miner()}
             for miner in miners:
                 client.send(ping_request, miner[1])
             time.sleep(ping_time)
