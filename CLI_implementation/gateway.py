@@ -16,7 +16,7 @@ import data_layer_config
 
 class LoadBalancer:
     def __init__(self):
-        self.list_of_connections = copy.copy(miners)
+        self.list_of_connections = miners
         self.next_index = None
 
     def select_next_miner(self):
@@ -30,6 +30,7 @@ class LoadBalancer:
                 return self.list_of_connections[0][1]
         except Exception as e:
             return None
+
 
 
 miners = []
