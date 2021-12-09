@@ -190,8 +190,9 @@ def new_connection(address):
     print("[NEW CONNECTION]: " + str(address) + " is now connected to this devices.!!")
 
 
-def miner_admin_options(num_of_unconfirmed_DIDs):
+def miner_admin_options(num_of_unconfirmed_DIDs, my_ip_address):
     active_connections()
+    print("Address of this device: " + my_ip_address)
     print("You have " + str(num_of_unconfirmed_DIDs) + " unsigned DID requests.")
     print(
         "The system is handling many tasks in the background. If you have nothing to do as admin, stay on this screen!")
