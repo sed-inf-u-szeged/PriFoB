@@ -32,7 +32,7 @@ def is_logged_in(f):
 def log_in_user(username):
     session['logged_in'] = True
     session['username'] = username
-    session['username'] = username
+    session['name'] = username
 
 
 @app.route("/register", methods=['GET', 'POST'])
