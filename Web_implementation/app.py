@@ -28,6 +28,12 @@ def is_logged_in(f):
     return wrap
 
 
+# log in the user by updating session
+def log_in_user(username):
+    session['logged_in'] = True
+    session['username'] = username
+
+
 @app.route("/register", methods=['GET', 'POST'])
 def register():
     form = RegisterForm(request.form)
@@ -57,6 +63,7 @@ def login():
             try:
                 if new_encryption_module.hashing_function(str(candidate_password)) == new_encryption_module.hashing_function(str(user_password)):
                     flash('You are now logged in', 'success')
+                    log_in_user(username)
                     return redirect(url_for('dashboard'))
                 else:
                     flash('Password is incorrect', 'danger')
@@ -85,7 +92,6 @@ def dashboard():
 
 @app.route("/")
 def index():
-
     return render_template('index.html')
 
 
