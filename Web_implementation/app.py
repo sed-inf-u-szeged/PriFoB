@@ -16,6 +16,7 @@ app.config['MYSQL_USER'] = 'Hamza'
 app.config['MYSQL_PASSWORD'] = '1234'
 admins = admin_manager.AdminManager()
 
+
 def is_logged_in(f):
     @wraps(f)
     def wrap(*args, **kwargs):
@@ -25,6 +26,7 @@ def is_logged_in(f):
             flash('Unauthorized. Please login', 'danger')
             return redirect(url_for('login'))
     return wrap
+
 
 @app.route("/register", methods=['GET', 'POST'])
 def register():
@@ -88,8 +90,6 @@ def index():
 
 
 if __name__ == '__main__':
-    from waitress import serve
-    serve(app, host="0.0.0.0", port=8080)
     app.secret_key = '1234'
-    app.run(debug=True)
+    app.run('0.0.0.0', 5000, debug=True)
 
