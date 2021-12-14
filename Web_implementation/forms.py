@@ -1,6 +1,6 @@
 from wtforms import Form, StringField, DecimalField, IntegerField, TextAreaField, PasswordField, validators
-
-# form used on Register page
+import terminology
+import my_address
 
 
 class RegisterForm(Form):
@@ -20,3 +20,10 @@ class SendMoneyForm(Form):
 # form used on the Buy page
 class BuyForm(Form):
     amount = StringField('Amount', [validators.Length(min=1, max=50)])
+
+
+class DIDRequestForm(Form):
+    issuer_name = StringField('Issuer Name', [validators.Length(min=1, max=50)])
+
+
+

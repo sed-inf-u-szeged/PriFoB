@@ -32,7 +32,6 @@ class LoadBalancer:
             return None
 
 
-
 miners = []
 address = my_address.provide_my_address()
 max_num_neighbors_per_miner = 5

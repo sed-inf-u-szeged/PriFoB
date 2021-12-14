@@ -9,6 +9,10 @@ import admin_manager
 from forms import *
 import new_encryption_module
 import time
+import terminology
+import my_address
+import msg_constructor
+import client
 
 
 app = Flask(__name__)
@@ -29,10 +33,27 @@ def is_logged_in(f):
 
 
 # log in the user by updating session
-def log_in_user(username):
+def log_in_user(username, gateway_address):
     session['logged_in'] = True
     session['username'] = username
     session['name'] = username
+    session['address'] = my_address.provide_my_address()
+    session['gatewayAddress'] = gateway_address
+
+
+@app.route("/Publish_my_DID", methods=['GET', 'POST'])
+@is_logged_in
+def publish_my_DID():
+    form = DIDRequestForm(request.form)
+    if request.method == 'POST' and form.validate():
+        username = request.form['username']
+        my_public_key = new_encryption_module.prepare_key_for_use(terminology.public, 'DID')
+        deserialized_public_key = new_encryption_module.deserialize_key(my_public_key)
+        DID_transaction = msg_constructor.new_did_transaction(username, session.get('address'), deserialized_public_key)
+        message = msg_constructor.construct_new_block_request(terminology.DID_publication_request, DID_transaction)
+        client.send(message, session.get('gatewayAddress'))
+        flash('DID publication request was sent. Once a positive response arrives, you can publish new schemes and issue new credentials.')
+    return render_template("Publish_my_DID.html")
 
 
 @app.route("/register", methods=['GET', 'POST'])
@@ -57,6 +78,7 @@ def login():
         username = request.form['username']
         candidate_password = request.form['password']
         user_password = admins.admin_registered(username)
+        gateway_address = request.form['gatewayAddress']
         if user_password is None:
             flash('User name is not valid', 'danger')
             return redirect(url_for('login'))
@@ -64,7 +86,7 @@ def login():
             try:
                 if new_encryption_module.hashing_function(str(candidate_password)) == new_encryption_module.hashing_function(str(user_password)):
                     flash('You are now logged in', 'success')
-                    log_in_user(username)
+                    log_in_user(username, gateway_address)
                     return redirect(url_for('dashboard'))
                 else:
                     flash('Password is incorrect', 'danger')
