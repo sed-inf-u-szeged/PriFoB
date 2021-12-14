@@ -45,7 +45,11 @@ def log_in_user(username, gateway_address):
 def publish_my_DID():
     form = DIDRequestForm(request.form)
     username = form.issuer_name.data
-    my_public_key = new_encryption_module.prepare_key_for_use(terminology.public, 'DID')
+    try:
+        my_public_key = new_encryption_module.prepare_key_for_use(terminology.public, 'DID')
+    except:
+        string_pri_key, string_pub_key = new_encryption_module.generate_PKI_keys('DID')
+        my_public_key = new_encryption_module.prepare_key_for_use(terminology.public, 'DID')
     deserialized_public_key = new_encryption_module.deserialize_key(my_public_key)
     DID_transaction = msg_constructor.new_did_transaction(username, session.get('address'), deserialized_public_key)
     message = msg_constructor.construct_new_block_request(terminology.DID_publication_request, DID_transaction)
