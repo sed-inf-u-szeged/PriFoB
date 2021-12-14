@@ -50,7 +50,8 @@ def publish_my_DID():
     DID_transaction = msg_constructor.new_did_transaction(username, session.get('address'), deserialized_public_key)
     message = msg_constructor.construct_new_block_request(terminology.DID_publication_request, DID_transaction)
     if request.method == 'POST' and form.validate():
-        client.send(message, session.get('gatewayAddress'))
+        # client.send(message, session.get('gatewayAddress'))
+        flash(message)
         flash('DID publication request was sent. Once a positive response arrives, you can publish new schemes and issue new credentials.')
     return render_template("Publish_my_DID.html", deserialized_public_key, message)
 
