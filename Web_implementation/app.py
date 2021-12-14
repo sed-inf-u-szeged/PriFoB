@@ -8,7 +8,6 @@ from functools import wraps
 import admin_manager
 from forms import *
 import new_encryption_module
-import time
 import terminology
 import my_address
 import msg_constructor
@@ -45,15 +44,15 @@ def log_in_user(username, gateway_address):
 @is_logged_in
 def publish_my_DID():
     form = DIDRequestForm(request.form)
+    username = request.form['username']
+    my_public_key = new_encryption_module.prepare_key_for_use(terminology.public, 'DID')
+    deserialized_public_key = new_encryption_module.deserialize_key(my_public_key)
+    DID_transaction = msg_constructor.new_did_transaction(username, session.get('address'), deserialized_public_key)
+    message = msg_constructor.construct_new_block_request(terminology.DID_publication_request, DID_transaction)
     if request.method == 'POST' and form.validate():
-        username = request.form['username']
-        my_public_key = new_encryption_module.prepare_key_for_use(terminology.public, 'DID')
-        deserialized_public_key = new_encryption_module.deserialize_key(my_public_key)
-        DID_transaction = msg_constructor.new_did_transaction(username, session.get('address'), deserialized_public_key)
-        message = msg_constructor.construct_new_block_request(terminology.DID_publication_request, DID_transaction)
         client.send(message, session.get('gatewayAddress'))
         flash('DID publication request was sent. Once a positive response arrives, you can publish new schemes and issue new credentials.')
-    return render_template("Publish_my_DID.html")
+    return render_template("Publish_my_DID.html", deserialized_public_key, message)
 
 
 @app.route("/register", methods=['GET', 'POST'])

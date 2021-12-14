@@ -1,6 +1,4 @@
 from wtforms import Form, StringField, DecimalField, IntegerField, TextAreaField, PasswordField, validators
-import terminology
-import my_address
 
 
 class RegisterForm(Form):
