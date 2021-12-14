@@ -57,7 +57,7 @@ def publish_my_DID():
         # client.send(message, session.get('gatewayAddress'))
         flash(message)
         flash('DID publication request was sent. Once a positive response arrives, you can publish new schemes and issue new credentials.')
-    return render_template("Publish_my_DID.html", deserialized_public_key, message)
+    return render_template("Publish_my_DID.html")
 
 
 @app.route("/register", methods=['GET', 'POST'])
