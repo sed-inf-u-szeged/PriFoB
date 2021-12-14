@@ -44,7 +44,7 @@ def log_in_user(username, gateway_address):
 @is_logged_in
 def publish_my_DID():
     form = DIDRequestForm(request.form)
-    username = request.form['username']
+    username = request.form['issuer_name']
     my_public_key = new_encryption_module.prepare_key_for_use(terminology.public, 'DID')
     deserialized_public_key = new_encryption_module.deserialize_key(my_public_key)
     DID_transaction = msg_constructor.new_did_transaction(username, session.get('address'), deserialized_public_key)
