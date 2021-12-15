@@ -6,6 +6,7 @@ from flask import Flask, render_template, flash, redirect, url_for, session, req
 from passlib.hash import sha256_crypt
 from functools import wraps
 import admin_manager
+from Web_implementation import shared_functions
 from forms import *
 import new_encryption_module
 import terminology
@@ -45,6 +46,8 @@ def log_in_user(username, gateway_address):
 def publish_my_DID():
     form = DIDRequestForm(request.form)
     issuer_name = form.issuer_name.data
+    publish_info = shared_functions.open_saved_file('local_files/DID_info.json')
+    DID_is_published = publish_info['is_published']
     try:
         my_public_key = new_encryption_module.prepare_key_for_use(terminology.public, 'DID')
     except:
@@ -57,7 +60,7 @@ def publish_my_DID():
         client.send(message, session.get('gatewayAddress'))
         flash(message)
         flash('DID publication request was sent. Once a positive response arrives, you can publish new schemes and issue new credentials.')
-    return render_template("publish_my_DID.html", form=form)
+    return render_template("publish_my_DID.html", form=form, did_is_published=DID_is_published)
 
 
 @app.route("/register", methods=['GET', 'POST'])

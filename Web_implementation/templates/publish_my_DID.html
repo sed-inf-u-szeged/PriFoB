@@ -2,7 +2,7 @@
 
 {% block body %}
 {% include 'includes/_messages.html' %}
-<p>Your DID is ...</p>
+<p>Your DID is published: {{did_is_published}}</p>
 {% from "includes/_formhelpers.html" import render_field %}
 <form method="POST" action="">
   <div class="from-group">
