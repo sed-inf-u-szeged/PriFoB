@@ -54,7 +54,7 @@ def publish_my_DID():
     DID_transaction = msg_constructor.new_did_transaction(issuer_name, session.get('address'), deserialized_public_key)
     message = msg_constructor.construct_new_block_request(terminology.DID_publication_request, DID_transaction)
     if request.method == 'POST' and form.validate():
-        # client.send(message, session.get('gatewayAddress'))
+        client.send(message, session.get('gatewayAddress'))
         flash(message)
         flash('DID publication request was sent. Once a positive response arrives, you can publish new schemes and issue new credentials.')
     return render_template("publish_my_DID.html", form=form)
@@ -124,6 +124,6 @@ def index():
 
 if __name__ == '__main__':
     app.secret_key = '1234'
-    # app.run('0.0.0.0', 5000, debug=True)
-    app.run(debug=True)
+    app.run('0.0.0.0', 5000, debug=True)
+    # app.run(debug=True)
 
