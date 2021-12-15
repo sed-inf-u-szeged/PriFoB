@@ -233,6 +233,10 @@ class Institution:
 def serve_institution_admin(institution, BC_address):
     while True:
         try:
+            did_info, file_exists = shared_functions.open_saved_file(
+                'local_files/DID_info/DID_info.txt')
+            did_info["is_published"] = False
+            shared_functions.save_file_locally(did_info, 'DID_info', 'DID_info')
             option = output.institution_options(len(institution.notifications))
             if option == '1':
                 institution.publish_my_DID(BC_address)
