@@ -13,6 +13,8 @@ import terminology
 import my_address
 import msg_constructor
 import client
+import os
+import output
 
 
 app = Flask(__name__)
@@ -48,19 +50,35 @@ def publish_my_DID():
     issuer_name = form.issuer_name.data
     publish_info, file_exists = shared_functions.open_saved_file('local_files/DID_info/DID_info.txt')
     DID_is_published = publish_info['is_published']
-    try:
-        my_public_key = new_encryption_module.prepare_key_for_use(terminology.public, 'DID')
-    except:
-        string_pri_key, string_pub_key = new_encryption_module.generate_PKI_keys('DID')
-        my_public_key = new_encryption_module.prepare_key_for_use(terminology.public, 'DID')
-    deserialized_public_key = new_encryption_module.deserialize_key(my_public_key)
-    DID_transaction = msg_constructor.new_did_transaction(issuer_name, session.get('address'), deserialized_public_key)
-    message = msg_constructor.construct_new_block_request(terminology.DID_publication_request, DID_transaction)
     if request.method == 'POST' and form.validate():
+        try:
+            my_public_key = new_encryption_module.prepare_key_for_use(terminology.public, 'DID')
+        except:
+            string_pri_key, string_pub_key = new_encryption_module.generate_PKI_keys('DID')
+            my_public_key = new_encryption_module.prepare_key_for_use(terminology.public, 'DID')
+        deserialized_public_key = new_encryption_module.deserialize_key(my_public_key)
+        DID_transaction = msg_constructor.new_did_transaction(issuer_name, session.get('address'), deserialized_public_key)
+        message = msg_constructor.construct_new_block_request(terminology.DID_publication_request, DID_transaction)
         client.send(message, session.get('gatewayAddress'))
-        flash(message)
+        flash(output.present_dictionary(message))
         flash('DID publication request was sent. Once a positive response arrives, you can publish new schemes and issue new credentials.')
     return render_template("publish_my_DID.html", form=form, did_is_published=DID_is_published)
+
+
+@app.route("/schemes", methods=['GET', 'POST'])
+@is_logged_in
+def schemes():
+    list_of_schema_titles = os.listdir("local_files/schemes/")
+    form = SchemaRequestForm(request.form)
+    return render_template("schemes.html", form=form, list_of_schema_titles=list_of_schema_titles)
+
+
+@app.route("/credentials", methods=['GET', 'POST'])
+@is_logged_in
+def credentials():
+    list_of_VC_titles = os.listdir("local_files/credentials/")
+    form = VCIssueForm(request.form)
+    return render_template("credentials.html", form=form, list_of_schema_titles=list_of_VC_titles)
 
 
 @app.route("/register", methods=['GET', 'POST'])
@@ -127,6 +145,6 @@ def index():
 
 if __name__ == '__main__':
     app.secret_key = '1234'
-    app.run('0.0.0.0', 5000, debug=True)
-    # app.run(debug=True)
+    # app.run('0.0.0.0', 5000, debug=True)
+    app.run(debug=True)
 

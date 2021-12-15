@@ -1,0 +1,20 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+{% include 'includes/_messages.html' %}
+<p>Currently available schemes:</p>
+    {% for schema_title in list_of_schema_titles: %}
+        {% print schema_title %}
+    {% endfor %}
+<div class="text-center">
+            <a class="d-block small mt-3" href="add_schema">You need a new schema? Click here to generate a new one.</a>
+          </div>
+<!--{% from "includes/_formhelpers.html" import render_field %}-->
+<!--<form method="POST" action="">-->
+<!--  <div class="from-group">-->
+<!--    {{render_field(form.schema_title, class_="form-control")}}-->
+<!--  </div>-->
+<!--  </br>-->
+<!--  <p><input type="submit" class="btn btn-primary" value="Publish"></p>-->
+<!--</form>-->
+{% endblock %}

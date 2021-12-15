@@ -24,4 +24,11 @@ class DIDRequestForm(Form):
     issuer_name = StringField('Issuer Name', [validators.Length(min=1, max=50)])
 
 
+class SchemaRequestForm(Form):
+    schema_title = StringField('Publish New Schema', [validators.Length(min=1, max=50)])
+
+
+class VCIssueForm(Form):
+    title = StringField('Publish New Schema', [validators.Length(min=1, max=50)])
+
 
