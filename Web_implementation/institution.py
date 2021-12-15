@@ -153,7 +153,7 @@ class Institution:
                             self.DID_published = body['added']
                             self.DID_index = body[terminology.index]
                             did_info, file_exists = shared_functions.open_saved_file(
-                                'local_files/DID_info/DID_info.json')
+                                'local_files/DID_info/DID_info.txt')
                             did_info["is_published"] = body['added']
                             shared_functions.save_file_locally(did_info, 'DID_info', 'DID_info')
                         elif body['block_type'] == terminology.schema_block:
