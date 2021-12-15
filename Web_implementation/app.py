@@ -46,7 +46,7 @@ def log_in_user(username, gateway_address):
 def publish_my_DID():
     form = DIDRequestForm(request.form)
     issuer_name = form.issuer_name.data
-    publish_info, file_exists = shared_functions.open_saved_file('local_files/DID_info/DID_info.json')
+    publish_info, file_exists = shared_functions.open_saved_file('local_files/DID_info/DID_info.txt')
     DID_is_published = publish_info['is_published']
     try:
         my_public_key = new_encryption_module.prepare_key_for_use(terminology.public, 'DID')
