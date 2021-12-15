@@ -40,24 +40,24 @@ def log_in_user(username, gateway_address):
     session['gatewayAddress'] = gateway_address
 
 
-@app.route("/Publish_my_DID", methods=['GET', 'POST'])
+@app.route("/publish_my_DID", methods=['GET', 'POST'])
 @is_logged_in
 def publish_my_DID():
     form = DIDRequestForm(request.form)
-    username = form.issuer_name.data
+    issuer_name = form.issuer_name.data
     try:
         my_public_key = new_encryption_module.prepare_key_for_use(terminology.public, 'DID')
     except:
         string_pri_key, string_pub_key = new_encryption_module.generate_PKI_keys('DID')
         my_public_key = new_encryption_module.prepare_key_for_use(terminology.public, 'DID')
     deserialized_public_key = new_encryption_module.deserialize_key(my_public_key)
-    DID_transaction = msg_constructor.new_did_transaction(username, session.get('address'), deserialized_public_key)
+    DID_transaction = msg_constructor.new_did_transaction(issuer_name, session.get('address'), deserialized_public_key)
     message = msg_constructor.construct_new_block_request(terminology.DID_publication_request, DID_transaction)
     if request.method == 'POST' and form.validate():
         # client.send(message, session.get('gatewayAddress'))
         flash(message)
         flash('DID publication request was sent. Once a positive response arrives, you can publish new schemes and issue new credentials.')
-    return render_template("Publish_my_DID.html")
+    return render_template("publish_my_DID.html", form=form)
 
 
 @app.route("/register", methods=['GET', 'POST'])
@@ -124,5 +124,6 @@ def index():
 
 if __name__ == '__main__':
     app.secret_key = '1234'
-    app.run('0.0.0.0', 5000, debug=True)
+    # app.run('0.0.0.0', 5000, debug=True)
+    app.run(debug=True)
 
