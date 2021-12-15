@@ -6,7 +6,7 @@ from flask import Flask, render_template, flash, redirect, url_for, session, req
 from passlib.hash import sha256_crypt
 from functools import wraps
 import admin_manager
-from Web_implementation import shared_functions
+import shared_functions
 from forms import *
 import new_encryption_module
 import terminology
