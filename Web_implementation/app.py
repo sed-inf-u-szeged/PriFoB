@@ -93,6 +93,7 @@ def add_schema():
 def issue_VC():
     return render_template("issue_VC.html")
 
+
 @app.route("/schemes", methods=['GET', 'POST'])
 @is_logged_in
 def schemes():
