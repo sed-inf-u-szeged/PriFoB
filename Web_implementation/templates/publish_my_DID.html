@@ -3,14 +3,13 @@
 {% block body %}
 {% include 'includes/_messages.html' %}
 <p>Your DID is published: {{did_is_published}}</p>
+{% if NOT did_is_published: %}
 {% from "includes/_formhelpers.html" import render_field %}
 <form method="POST" action="">
   <div class="from-group">
-    {{if NOT did_is_published:}}
       {{render_field(form.issuer_name, class_="form-control")}}
-    {{endif}}
   </div>
-  </br>
   <p><input type="submit" class="btn btn-primary" value="Send"></p>
 </form>
+{% endif %}
 {% endblock %}
