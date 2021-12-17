@@ -6,7 +6,8 @@
 {% from "includes/_formhelpers.html" import render_field %}
 <form method="POST" action="">
   <div class="from-group">
-    {{render_field(form.issuer_name, class_="form-control")}}
+    {{if NOT did_is_published:}}
+      {{render_field(form.issuer_name, class_="form-control")}}
   </div>
   </br>
   <p><input type="submit" class="btn btn-primary" value="Send"></p>
