@@ -1,0 +1,21 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+{% include 'includes/_messages.html' %}
+<p>You are attempting to publish a new Schema for a new type of credentials.</p>
+<p>The new Schema looks so far as follows:</p>
+<p>{{ schema }}</p>
+{% from "includes/_formhelpers.html" import render_field %}
+<form method="POST" action="">
+  <div class="from-group">
+      {{render_field(form.schema_title, class_="form-control")}}
+  </div>
+    <p><input type="submit" class="btn btn-primary" value="Add Schema Title"></p></form>
+<form method="POST" action="">
+  <div class="from-group">
+      {{render_field(form.new_schema_attribute, class_="form-control")}}
+  </div>
+    <p><input type="submit" class="btn btn-primary" value="Add this attribute to the new Schema"></p>
+    <p><input type="submit" class="btn btn-primary" value="Publish This Schema"></p>
+</form>
+{% endblock %}

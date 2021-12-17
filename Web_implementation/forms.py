@@ -25,7 +25,8 @@ class DIDRequestForm(Form):
 
 
 class SchemaRequestForm(Form):
-    schema_title = StringField('Publish New Schema', [validators.Length(min=1, max=50)])
+    schema_title = StringField('Title', [validators.Length(min=1, max=50)])
+    new_schema_attribute = StringField('New Schema Attribute', [validators.Length(min=1, max=50)])
 
 
 class VCIssueForm(Form):

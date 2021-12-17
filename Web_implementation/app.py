@@ -59,11 +59,39 @@ def publish_my_DID():
         deserialized_public_key = new_encryption_module.deserialize_key(my_public_key)
         DID_transaction = msg_constructor.new_did_transaction(issuer_name, session.get('address'), deserialized_public_key)
         message = msg_constructor.construct_new_block_request(terminology.DID_publication_request, DID_transaction)
-        client.send(message, session.get('gatewayAddress'))
+        # client.send(message, session.get('gatewayAddress'))
         flash(output.present_dictionary(message))
         flash('DID publication request was sent. Once a positive response arrives, you can publish new schemes and issue new credentials.')
+        session['issuer_name'] = issuer_name
     return render_template("publish_my_DID.html", form=form, did_is_published=DID_is_published)
 
+
+@app.route("/add_schema", methods=['GET', 'POST'])
+@is_logged_in
+def add_schema():
+    form = SchemaRequestForm(request.form)
+    schema_transaction = {
+    # 'institution_name': session['issuer_name'],
+                          'institution_address': session['address'],
+                          terminology.identifier: ''}
+                           # 'schema_public_key': public_key,
+                           # 'schema_attributes': attributes}
+    # private_key, public_key = shared_functions.select_keys(schema_transaction[terminology.identifier])
+    # schema_public_key = new_encryption_module.prepare_key_for_use(terminology.public,
+    #                                                               schema_transaction[terminology.identifier], None)
+    # deserialized_public_key = new_encryption_module.deserialize_key(schema_public_key)
+    # print('keys of the new schema are generated')
+    # schema_transaction['schema_public_key'] = deserialized_public_key
+    # schema_transaction[terminology.DID_index] = self.DID_index
+    # print('schema public key is added to the request')
+
+    return render_template("add_schema.html", form=form, schema=schema_transaction)
+
+
+@app.route("/issue_VC", methods=['GET', 'POST'])
+@is_logged_in
+def issue_VC():
+    return render_template("issue_VC.html")
 
 @app.route("/schemes", methods=['GET', 'POST'])
 @is_logged_in
@@ -145,6 +173,6 @@ def index():
 
 if __name__ == '__main__':
     app.secret_key = '1234'
-    app.run('0.0.0.0', 5000, debug=True)
-    # app.run(debug=True)
+    # app.run('0.0.0.0', 5000, debug=True)
+    app.run(debug=True)
 
