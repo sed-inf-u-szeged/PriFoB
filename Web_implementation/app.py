@@ -174,6 +174,6 @@ def index():
 
 if __name__ == '__main__':
     app.secret_key = '1234'
-    # app.run('0.0.0.0', 5000, debug=True)
-    app.run(debug=True)
+    app.run('0.0.0.0', 5000, debug=True)
+    # app.run(debug=True)
 
