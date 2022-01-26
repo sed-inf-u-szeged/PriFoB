@@ -1,0 +1,28 @@
+<resources>
+    <string name="app_name">PriFob</string>
+    <string name="action_settings">Settings</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">First Fragment</string>
+    <string name="second_fragment_label">Second Fragment</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">PriFob</string>
+    <string name="nav_header_subtitle">Information</string>
+    <string name="nav_header_desc">Navigation header</string>
+
+
+    <string name="hello_first_fragment">Hello first fragment</string>
+    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="credentials_fragment_label">PriFoB</string>
+    <string name="profile_fragment_label">Profile</string>
+    <string name="credential_fragment_label">Credential</string>
+    <string name="select_institution_fragment_label">Select Institution</string>
+    <string name="select_profession_fragment_label">Select Profession</string>
+    <string name="schema_fragment_label" >Schema</string>
+
+</resources>

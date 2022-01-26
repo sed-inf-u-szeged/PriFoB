@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/CredentialsFragment">
+
+    <fragment
+        android:id="@+id/CredentialsFragment"
+        android:name="hu.sed.prifob.CredentialsFragment"
+        android:label="@string/credentials_fragment_label"
+        tools:layout="@layout/fragment_credentials">
+
+        <action
+            android:id="@+id/action_CredentialsFragment_to_ProfileFragment"
+            app:destination="@id/ProfileFragment" />
+
+        <action
+            android:id="@+id/action_CredentialsFragment_to_CredentialFragment"
+            app:destination="@id/CredentialFragment" />
+        <action
+            android:id="@+id/action_CredentialsFragment_to_SelectInstitutionFragment"
+            app:destination="@id/SelectInstitutionFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/ProfileFragment"
+        android:name="hu.sed.prifob.ProfileFragment"
+        android:label="@string/profile_fragment_label"
+        tools:layout="@layout/fragment_profile">
+    </fragment>
+
+    <fragment
+        android:id="@+id/CredentialFragment"
+        android:name="hu.sed.prifob.CredentialFragment"
+        android:label="@string/credential_fragment_label"
+        tools:layout="@layout/fragment_credential"/>
+
+    <fragment
+        android:id="@+id/SelectInstitutionFragment"
+        android:name="hu.sed.prifob.SelectInstitutionFragment"
+        android:label="@string/select_institution_fragment_label"
+        tools:layout="@layout/fragment_select_institution_list">
+        <action
+            android:id="@+id/action_SelectInstitutionFragment_to_SelectProfessionFragment"
+            app:destination="@id/SelectProfessionFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/SelectProfessionFragment"
+        android:name="hu.sed.prifob.SelectProfessionFragment"
+        android:label="@string/select_profession_fragment_label"
+        tools:layout="@layout/fragment_select_profession_list">
+        <action
+            android:id="@+id/action_SelectProfessionFragment_to_SchemaFragment"
+            app:destination="@id/SchemaFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/SchemaFragment"
+        android:name="hu.sed.prifob.SchemaFragment"
+        android:label="@string/schema_fragment_label"
+        tools:layout="@layout/fragment_schema">
+        <action
+            android:id="@+id/action_SchemaFragment_to_CredentialsFragment"
+            app:destination="@id/CredentialsFragment" />
+    </fragment>
+</navigation>
