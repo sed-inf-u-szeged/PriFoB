@@ -306,17 +306,19 @@ class Miner:
                 print(e)
 
 
-def start():
-    self_ip = my_address.provide_my_address()
-    print("This node's IP address is:")
-    print(self_ip)
-    location = input('please input your location:\n')
-    BC_address = input('Please enter the BC_Gate IP Address:\n')
-    private_key, public_key = shared_functions.select_keys('my_key')
-    miner = Miner(BC_address, location, private_key, public_key)
-    process_1 = threading.Thread(target=miner.automated_processing, )
-    process_1.start()
-    process_2 = threading.Thread(target=miner.admin_processing, )
-    process_2.start()
-    process_3 = threading.Thread(target=server.start, )
-    process_3.start()
+#miner: Miner
+
+#def start():
+self_ip = my_address.provide_my_address()
+print("This node's IP address is:")
+print(self_ip)
+location = input('please input your location:\n')
+BC_address = input('Please enter the BC_Gate IP Address:\n')
+private_key, public_key = shared_functions.select_keys('my_key')
+miner = Miner(BC_address, location, private_key, public_key)
+process_1 = threading.Thread(target=miner.automated_processing, )
+process_1.start()
+process_2 = threading.Thread(target=miner.admin_processing, )
+process_2.start()
+process_3 = threading.Thread(target=server.start, )
+process_3.start()

@@ -254,16 +254,18 @@ def serve_institution_admin(institution, BC_address):
             print(e)
 
 
-def initiate_institution(BC_address):
-    name = output.request_inst_name()
-    private_DID, public_DID = shared_functions.select_keys('DID')
-    institution = Institution(name, private_DID, public_DID)
-    process_1 = threading.Thread(target=server.start, )
-    process_1.start()
-    process_2 = threading.Thread(target=serve_institution_admin, args=(institution, BC_address))
-    process_2.start()
-    process_3 = threading.Thread(target=institution.automatic_credential_requests_handling)
-    process_3.start()
+#def initiate_institution(BC_address):
+BC_address = receiver
+name = output.request_inst_name()
+private_DID, public_DID = shared_functions.select_keys('DID')
+institution = Institution(name, private_DID, public_DID)
+process_1 = threading.Thread(target=server.start, )
+process_1.start()
+process_2 = threading.Thread(target=serve_institution_admin, args=(institution, BC_address))
+process_2.start()
+process_3 = threading.Thread(target=institution.automatic_credential_requests_handling)
+process_3.start()
 
+#institution: Institution
 
-initiate_institution(receiver)
+#initiate_institution(receiver)

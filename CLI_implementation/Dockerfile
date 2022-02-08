@@ -5,9 +5,9 @@ WORKDIR /app
 RUN apt update
 RUN apt install -y python3-rsa
 
-RUN pip install cryptography
-RUN pip install rsa
-RUN pip install tabulate
+COPY requirements.txt requirements.txt
+
+RUN pip install -r requirements.txt
 
 RUN mkdir -p local_files/credentials
 RUN mkdir -p local_files/keys

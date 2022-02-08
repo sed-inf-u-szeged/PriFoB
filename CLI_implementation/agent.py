@@ -125,6 +125,7 @@ class Customer:
                                                                self.last_name, self.ip_address, agent_data)
         request_confirmation = output.credential_request_sent(request, institution_address)
         if request_confirmation:
+            print("request_credential request ", request)
             client.send(request, institution_address)
 
     def download_full_BC(self):
