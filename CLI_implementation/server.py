@@ -9,7 +9,7 @@ header = 512
 PORT = 5050
 ip_address = my_address.provide_my_address()
 print("IP address of this Server: " + str(ip_address))
-ADDR = (ip_address, PORT)
+ADDR = ('', PORT)
 FORMAT = 'UTF-8'
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
