@@ -9,15 +9,33 @@ class SortedBlocks:
 
 
 def add_to_sorted_DID_list(sorted_chain, DID_identifier, DID_index):
-    bisect.insort(sorted_chain.sorted_DIDs, (DID_identifier, DID_index))
+    the_list = sorted_chain.sorted_DIDs
+    fst, snd = zip(*the_list)
+    index = bisect.bisect(fst, DID_identifier) - 1
+    if index < len(sorted_chain.sorted_DIDs) and DID_identifier == fst[index]:
+        pass
+    else:
+        bisect.insort(sorted_chain.sorted_DIDs, (DID_identifier, DID_index))
 
 
 def add_to_sorted_schemes_list(sorted_chain, schema_identifier, schema_index):
-    bisect.insort(sorted_chain.sorted_schemes, (schema_identifier, schema_index))
+    the_list = sorted_chain.sorted_schemes
+    fst, snd = zip(*the_list)
+    index = bisect.bisect(fst, schema_identifier) - 1
+    if index < len(sorted_chain.sorted_DIDs) and schema_identifier == fst[index]:
+        pass
+    else:
+        bisect.insort(sorted_chain.sorted_schemes, (schema_identifier, schema_index))
 
 
 def add_to_sorted_revoke_list(sorted_chain, revoke_identifier, revoke_index):
-    bisect.insort(sorted_chain.sorted_revoked_cres, (revoke_identifier, revoke_index))
+    the_list = sorted_chain.sorted_revoked_cres
+    fst, snd = zip(*the_list)
+    index = bisect.bisect(fst, revoke_identifier) - 1
+    if index < len(sorted_chain.sorted_DIDs) and revoke_identifier == fst[index]:
+        pass
+    else:
+        bisect.insort(sorted_chain.sorted_revoked_cres, (revoke_identifier, revoke_index))
 
 
 def get_index(sorted_chain, list_level, target):
