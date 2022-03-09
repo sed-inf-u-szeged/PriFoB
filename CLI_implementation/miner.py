@@ -117,7 +117,7 @@ class Miner:
                             print('new valid block is received..!')
                             blockchain.send_request_to_active_neighbors(request_under_processing, self.neighbors)
                             self.put_blockchain_on_secondary_memory()
-                elif received_block['Header'][terminology.the_type] == terminology.schema_block:
+                elif received_block['Header'][terminology.the_type] == terminology.revoke_block:
                     revoke_index = bisect_test.get_index(self.my_blockchain.sorted_chain, 3, revoke_identifier)
                     # existing_block, revoke_index = self.my_blockchain.revoke_block_exists(received_block['Body'][terminology.transaction][terminology.DID_index], received_block['Body'][terminology.transaction][terminology.schema_index], revoke_identifier)
                     if revoke_index is not None and revoke_index == received_block['Header'][terminology.index]:
