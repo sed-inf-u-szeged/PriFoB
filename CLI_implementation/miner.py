@@ -243,9 +243,7 @@ class Miner:
         hash_of_credential = body_of_request['hash_of_credential']
         did_index = body_of_request[terminology.DID_index]
         schema_index = body_of_request[terminology.schema_index]
-        # schema_block, DID_index, schema_index, revoke_index = self.my_blockchain.already_registered(terminology.schema_block, body_of_request[terminology.did_identifier], body_of_request[terminology.schema_identifier], new_encryption_module.hashing_function(body_of_request))
-        revoke_index = bisect_test.get_index(self.my_blockchain.sorted_chain, 3, new_encryption_module.hashing_function(body_of_request))
-        # revoke_block, revoke_index = self.my_blockchain.revoke_block_exists(did_index, schema_index, hash_of_credential)
+        revoke_index = bisect_test.get_index(self.my_blockchain.sorted_chain, 3, hash_of_credential)
         if not revoke_index:
             accredited_in = self.my_blockchain.chain[did_index]['Body'][terminology.transaction]['Accredited By']
             key = new_encryption_module.prepare_key_for_use(terminology.public, None, self.my_blockchain.chain[did_index]['schemes_chain'][schema_index]['Body'][terminology.transaction]['schema_public_key'])
