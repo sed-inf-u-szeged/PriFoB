@@ -1,4 +1,6 @@
 import os
+import time
+
 import client
 import server
 import threading
@@ -81,9 +83,9 @@ class Miner:
             print(e)
 
     def handle_new_block(self, request_under_processing):
+        time.sleep(1)
         try:
             received_block = request_under_processing['body']
-            send_to_neighbors = False
             if consensus.verify_proof_of_authority(self.miners, received_block['Header']['Minter_id'],
                                                    received_block['Body'],
                                                    received_block['Header'][terminology.signature]):
