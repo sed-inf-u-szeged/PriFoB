@@ -30,10 +30,7 @@ def get_index(sorted_chain, list_level, target):
             the_list = sorted_chain.sorted_revoked_cres
         if the_list:
             fst, snd = zip(*the_list)
-            index = bisect.bisect(fst, target) - 1
             if target in fst:
-                return snd[index], True
+                return snd[bisect.bisect(fst, target) - 1]
             else:
-                return None, False
-
-
+                return False

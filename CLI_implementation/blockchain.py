@@ -79,8 +79,8 @@ class Blockchain:
             if transaction_type == terminology.schema_publication_request:
                 block_type = terminology.schema_block
                 DID_index = transaction_data[terminology.DID_index]
-                block_index, block_exists = bisect_test.get_index(self.sorted_chain, 2, schema_identifier)
-                if block_exists:
+                block_index = bisect_test.get_index(self.sorted_chain, 2, schema_identifier)
+                if block_index:
                     existing_block = self.chain[DID_index]['schemes_chain'][block_index]
                 # existing_block, schema_index = self.schema_block_exists(DID_index, schema_identifier)
             else:
@@ -88,22 +88,22 @@ class Blockchain:
                     block_type = terminology.revoke_block
                     DID_index = transaction_data[terminology.DID_index]
                     schema_index = transaction_data[terminology.schema_index]
-                    block_index, block_exists = bisect_test.get_index(self.sorted_chain, 3, revoke_identifier)
-                    if block_exists:
+                    block_index = bisect_test.get_index(self.sorted_chain, 3, revoke_identifier)
+                    if block_index:
                         existing_block = self.chain[DID_index]['schemes_chain'][schema_index]['Hashes_of_revoked_credentials'][block_index]
                     # existing_block, revoke_index = self.revoke_block_exists(DID_index, schema_index, revoke_identifier)
                 else:
                     block_type = terminology.DID_block
-                    block_index, block_exists = bisect_test.get_index(self.sorted_chain, 1, DID_identifier)
+                    block_index = bisect_test.get_index(self.sorted_chain, 1, DID_identifier)
                     # block_index = self.sorted_chain.get_index(1, DID_identifier)
-                    if block_exists:
+                    if block_index:
                         existing_block = self.chain[block_index]
                     # existing_block, DID_index = self.DID_block_exists(DID_identifier)
                     # existing_block, DID_index, schema_index, revoke_index = self.check_if_block_exists(received_block_request)
             already_signed = False
             transaction_is_ready_to_mint = False
             issuer_signature = 0
-            if not block_exists:
+            if not block_index:
                 if transaction_type == terminology.DID_publication_request:
 
                     all_signatures_are_correct, self_signed, signed_by_all = self.check_signatures(transaction_data,
