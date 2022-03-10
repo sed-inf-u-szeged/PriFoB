@@ -104,7 +104,8 @@ class Miner:
                             blockchain.send_request_to_active_neighbors(request_under_processing, self.neighbors)
                             self.put_blockchain_on_secondary_memory()
                 elif received_block['Header'][terminology.the_type] == terminology.schema_block:
-                    schema_index = bisect_test.get_index(self.my_blockchain.sorted_chain, 2, schema_identifier)
+                    new_schema_identifier = new_encryption_module.hashing_function(received_block['Body'][terminology.transaction])
+                    schema_index = bisect_test.get_index(self.my_blockchain.sorted_chain, 2, new_schema_identifier)
                     # existing_block, schema_index = self.my_blockchain.schema_block_exists(received_block['Body'][terminology.transaction][terminology.DID_index], schema_identifier)
                     if not schema_index:
                         if self.previous_signature_is_correct(received_block['Header'][terminology.the_type],
