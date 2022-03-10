@@ -83,7 +83,6 @@ class Miner:
             print(e)
 
     def handle_new_block(self, request_under_processing):
-        time.sleep(1)
         try:
             received_block = request_under_processing['body']
             if consensus.verify_proof_of_authority(self.miners, received_block['Header']['Minter_id'],
@@ -92,9 +91,9 @@ class Miner:
                 DID_identifier, schema_identifier, revoke_identifier = blockchain.get_identifiers(
                     received_block['Body'][terminology.transaction], received_block['Header'][terminology.the_type])
                 if received_block['Header'][terminology.the_type] == terminology.DID_block:
-                    DID_index = bisect_test.get_index(self.my_blockchain.sorted_chain, 1, DID_identifier)
+                    DID_index, block_exists = bisect_test.get_index(self.my_blockchain.sorted_chain, 1, DID_identifier)
                     # existing_block, DID_index = self.my_blockchain.DID_block_exists(DID_identifier)
-                    if DID_index != received_block['Header'][terminology.index]:
+                    if not block_exists:
                         if self.previous_signature_is_correct(received_block['Header'][terminology.the_type],
                                                               received_block['Body'][terminology.previous_signature],
                                                               DID_index, None):
@@ -105,9 +104,9 @@ class Miner:
                             blockchain.send_request_to_active_neighbors(request_under_processing, self.neighbors)
                             self.put_blockchain_on_secondary_memory()
                 elif received_block['Header'][terminology.the_type] == terminology.schema_block:
-                    schema_index = bisect_test.get_index(self.my_blockchain.sorted_chain, 2, schema_identifier)
+                    schema_index, block_exists = bisect_test.get_index(self.my_blockchain.sorted_chain, 2, schema_identifier)
                     # existing_block, schema_index = self.my_blockchain.schema_block_exists(received_block['Body'][terminology.transaction][terminology.DID_index], schema_identifier)
-                    if schema_index != received_block['Header'][terminology.index]:
+                    if not block_exists:
                         if self.previous_signature_is_correct(received_block['Header'][terminology.the_type],
                                                               received_block['Body'][terminology.previous_signature],
                                                               received_block['Body'][terminology.transaction][terminology.DID_index], schema_index):
@@ -118,9 +117,9 @@ class Miner:
                             blockchain.send_request_to_active_neighbors(request_under_processing, self.neighbors)
                             self.put_blockchain_on_secondary_memory()
                 elif received_block['Header'][terminology.the_type] == terminology.revoke_block:
-                    revoke_index = bisect_test.get_index(self.my_blockchain.sorted_chain, 3, revoke_identifier)
+                    revoke_index, block_exists = bisect_test.get_index(self.my_blockchain.sorted_chain, 3, revoke_identifier)
                     # existing_block, revoke_index = self.my_blockchain.revoke_block_exists(received_block['Body'][terminology.transaction][terminology.DID_index], received_block['Body'][terminology.transaction][terminology.schema_index], revoke_identifier)
-                    if revoke_index != received_block['Header'][terminology.index]:
+                    if not block_exists:
                         if self.previous_signature_is_correct(received_block['Header'][terminology.the_type],
                                                               received_block['Body'][terminology.previous_signature],
                                                               received_block['Body'][terminology.transaction][
@@ -244,9 +243,9 @@ class Miner:
         did_index = body_of_request[terminology.DID_index]
         schema_index = body_of_request[terminology.schema_index]
         # schema_block, DID_index, schema_index, revoke_index = self.my_blockchain.already_registered(terminology.schema_block, body_of_request[terminology.did_identifier], body_of_request[terminology.schema_identifier], new_encryption_module.hashing_function(body_of_request))
-        revoke_index = bisect_test.get_index(self.my_blockchain.sorted_chain, 3, new_encryption_module.hashing_function(body_of_request))
+        revoke_index, block_exists = bisect_test.get_index(self.my_blockchain.sorted_chain, 3, new_encryption_module.hashing_function(body_of_request))
         # revoke_block, revoke_index = self.my_blockchain.revoke_block_exists(did_index, schema_index, hash_of_credential)
-        if revoke_index is None:
+        if not block_exists:
             accredited_in = self.my_blockchain.chain[did_index]['Body'][terminology.transaction]['Accredited By']
             key = new_encryption_module.prepare_key_for_use(terminology.public, None, self.my_blockchain.chain[did_index]['schemes_chain'][schema_index]['Body'][terminology.transaction]['schema_public_key'])
             is_valid = new_encryption_module.verify_signature(hash_of_credential, body_of_request[terminology.signature], key)

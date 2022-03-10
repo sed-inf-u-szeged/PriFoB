@@ -30,29 +30,10 @@ def get_index(sorted_chain, list_level, target):
             the_list = sorted_chain.sorted_revoked_cres
         if the_list:
             fst, snd = zip(*the_list)
-            # here, a for loop needs to be implemented where it iterates from the end of the sorted list towards the genises block
-            # if the following condition applies, the for loop shall break and the snd[index] is returned. Otherwise, the for loop continues
-            # this should allow for DAG based adoption without the "longest chain" rule to be applied. To this end, a tie appearing in the index of several blocks
-            # does not imply a security problem
             index = bisect.bisect(fst, target) - 1
-            if index < len(the_list) and target == fst[index]:
-                return snd[index]
-                # print(str(new_target) + ' EXISTS with index = ' + str(snd[index]))
-                # return True
+            if target in fst:
+                return snd[index], True
             else:
-                return None
-                # print(new_target + ' DOES NOT EXIST')
-                # return False
-        else:
-            return None
-        #     for i in range(len(the_list)):
-        #         try:
-        #             index = bisect.bisect(fst, target) - 1
-        #             if index < len(the_list) and target == fst[index]:
-        #                 value_to_return = snd[index]
-        #                 break
-        #         except Exception as e:
-        #             print(e)
-        #     return value_to_return
-        # else:
-        #     return None
+                return None, False
+
+
