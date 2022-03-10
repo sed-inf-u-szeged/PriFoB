@@ -34,7 +34,6 @@ def get_index(sorted_chain, list_level, target):
             # if the following condition applies, the for loop shall break and the snd[index] is returned. Otherwise, the for loop continues
             # this should allow for DAG based adoption without the "longest chain" rule to be applied. To this end, a tie appearing in the index of several blocks
             # does not imply a security problem
-            value_to_return = None
             index = bisect.bisect(fst, target) - 1
             if index < len(the_list) and target == fst[index]:
                 return snd[index]
