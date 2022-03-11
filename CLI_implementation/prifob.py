@@ -1,5 +1,5 @@
 import json
-
+import os
 import output
 import shared_functions
 from flask import Flask, jsonify, abort, request, make_response, url_for, send_file, Response
@@ -117,7 +117,7 @@ if decision == '2':
             print(e)
         return ""
 
-    @app.route('/prifobapi/v1.0/validity', methods=['GET'])
+    @app.route('/prifobapi/v1.0/validity', methods=['POST'])
     def is_valid():
         #handle_signature
         accredited_in = None
@@ -187,6 +187,8 @@ if decision == '3':
             print('400 not KEY_SCHEMA in request.json')
             abort(400)
 
+        print('request.json', request.json)
+
         path = "local_files/credentials/"
         #request_level = request[terminology.schema_identifier]
         request_level = request.json[KEY_SCHEMA]
@@ -196,8 +198,9 @@ if decision == '3':
         #TODO ?
         print('schema[schema_attributes] ', schema['schema_attributes'])
         for attribute in schema['schema_attributes']:
-            #if attribute[1] == 'Mandatory':
-            credential_label = credential_label + request.json[attribute]
+            if attribute[1] == 'Mandatory':
+                print('for attr', attribute)
+                credential_label = credential_label + request.json['attributes'][attribute[0]]
         print('credential_label ', credential_label)
         # print('institution is looking for the credential with title:')
         # print(credential_label)
@@ -215,10 +218,13 @@ if decision == '3':
         response = {terminology.the_type: 'response_to_credential_request'}
         if credential_is_available:
             response['status'] = True
-            encrypted_credential, final_encoded_encrypted_symmetric_key = shared_functions.react_to_credential_request(
-                requested_credential, request.json[KEY_PUB])
-            response['encrypted_credential'] = encrypted_credential
-            response['encrypted_symmetric_key'] = final_encoded_encrypted_symmetric_key
+            #encrypted_credential, final_encoded_encrypted_symmetric_key = shared_functions.react_to_credential_request(
+            #    requested_credential, request.json[KEY_PUB])
+            #response['encrypted_credential'] = encrypted_credential
+            #response['encrypted_symmetric_key'] = final_encoded_encrypted_symmetric_key
+            response['Credential'] = requested_credential['Credential']
+            response['Signature'] = requested_credential['Signature']
+            response['hash'] = new_encryption_module.hashing_function(requested_credential)
         else:
             response['status'] = False
             response['original_request'] = request
