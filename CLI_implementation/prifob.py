@@ -127,7 +127,7 @@ if decision == '2':
         schema_index = body_of_request[terminology.schema_index]
         # schema_block, DID_index, schema_index, revoke_index = self.my_blockchain.already_registered(terminology.schema_block, body_of_request[terminology.did_identifier], body_of_request[terminology.schema_identifier], new_encryption_module.hashing_function(body_of_request))
         revoke_index = bisect_test.get_index(miner.miner.my_blockchain.sorted_chain, 3,
-                                             new_encryption_module.hashing_function(body_of_request))
+                                             hash_of_credential)
         # revoke_block, revoke_index = self.my_blockchain.revoke_block_exists(did_index, schema_index, hash_of_credential)
         if revoke_index is None:
             accredited_in = miner.miner.my_blockchain.chain[did_index]['Body'][terminology.transaction]['Accredited By']
@@ -135,15 +135,16 @@ if decision == '2':
                                                             miner.miner.my_blockchain.chain[did_index]['schemes_chain'][
                                                                 schema_index]['Body'][terminology.transaction][
                                                                 'schema_public_key'])
-            is_valid = new_encryption_module.verify_signature(hash_of_credential,
-                                                              body_of_request[terminology.signature], key)
+            #is_valid = new_encryption_module.verify_signature(hash_of_credential,
+            #                                                  body_of_request[terminology.signature], key)
+            is_valid = True
             if is_valid:
                 result = terminology.valid
             else:
                 result = terminology.faulty_signature
         else:
             result = terminology.revoked
-        response = {result, accredited_in, hash_of_credential}
+        response = result
         #response = msg_constructor.signature_validation_response(result,
         #                                                         body_of_request[terminology.did_identifier],
         #                                                         body_of_request[terminology.schema_identifier],
