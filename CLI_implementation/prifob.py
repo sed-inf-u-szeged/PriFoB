@@ -117,7 +117,7 @@ if decision == '2':
             print(e)
         return ""
 
-    @app.route('/prifobapi/v1.0/validity', methods=['GET'])
+    @app.route('/prifobapi/v1.0/validity', methods=['POST'])
     def is_valid():
         #handle_signature
         accredited_in = None
