@@ -229,7 +229,7 @@ if decision == '3':
             #response['encrypted_symmetric_key'] = final_encoded_encrypted_symmetric_key
             response['Credential'] = requested_credential['Credential']
             response['Signature'] = requested_credential['Signature']
-            response['hash'] = new_encryption_module.hashing_function(requested_credential)
+            response['hash'] = new_encryption_module.hashing_function(requested_credential['Credential'])
         else:
             response['status'] = False
             response['original_request'] = request
