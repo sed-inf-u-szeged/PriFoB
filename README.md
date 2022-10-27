@@ -1,10 +1,13 @@
 # PriFoB
 This repository consists of the source code of the PriFoB proof-of-concept application, being developed in the FogBlock4Trust sub-grant project of the TruBlo EU H2020 project. This solution is continuously being developed and the provided figures may slightly differ from what it will look after future modifications. However, they will mostly give similar or enhanced services.
 
-The PriFoB solution paper is accepted for publication in the leading Journal of Network and Computer Applications (Q1, IF: 6.281, SJR: 2.193) and currently being edited for final publication. The preprint is available at:
+The PriFoB solution paper is published in the leading Journal of Network and Computer Applications (Q1, IF: 6.281, SJR: 2.193):
 
-https://www.researchgate.net/publication/358172761_Prifob_A_Privacy-Aware_Fog-Enhanced_Blockchain-Based_System_for_Global_Accreditation_and_Credential_Verification
+https://www.sciencedirect.com/science/article/pii/S1084804522000935?via%3Dihub
 
+A full vedio tutorial is availabel on YouTube:
+
+https://www.youtube.com/watch?v=-ais62mcQXg&list=PLpRuKQ4GtoaMn1oXg6jsbkyf4PXvdZAEJ&ab_channel=HamzaPhD
 
 
 PriFoB is a system that facilitates trusted and privacy-preserving credential verification, which stands for Privacy preserving Fog-enhanced Blockchain. The main technologies and methods used in PriFoB are Zero-Knowledge-Proofs (ZKPs), Fog Computing (FC) and public-permissioned Blockchain (BC). The interaction between PriFoB entities, as described in this tutorial, should allow organizations to issue credentials that can be verified by their owners in a timely manner. Meanwhile, this interaction allows for governmental bodies to, collectively, contribute to the accreditation of the issuer organizations. Customers of the accredited organizations can then request their digital credentials and verify them instantly without the need for private data disclosure to any system entities. FC is deployed to allow efficient communications between organizations and customers, while BC is deployed to allow the provision of a distributed verifier for both, issuer organizations and their issued credentials. The general architecture of PriFoB can be described as in the following figure:
